@@ -83,10 +83,10 @@ export default function Landing() {
       <footer style={{ marginTop: 'var(--space-8)', paddingTop: 'var(--space-6)', borderTop: '1px solid var(--border-light)', textAlign: 'center', color: 'var(--text-muted)' }}>
         <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-6)', marginBottom: 'var(--space-4)' }}>
           <NavLink to="/demo" style={{ color: 'var(--brand-primary)' }}>View Demo Scenario</NavLink>
-          <a href="#" style={{ color: 'var(--brand-primary)' }}>Read Documentation</a>
+          <a href="https://github.com/Navigators/Navigators/tree/main/docs" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand-primary)' }}>Read Documentation</a>
           <a href="mailto:contact@navigators.com" style={{ color: 'var(--brand-primary)' }}>Contact Support</a>
         </div>
-        <p>Developed by Navigators for SIH</p>
+        <p>Developed by Navigators</p>
       </footer>
     </div>
   );

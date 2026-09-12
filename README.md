@@ -1,7 +1,6 @@
 # Navigators
 
-AI/ML Intelligent Dead Reckoning & GNSS+INS Navigation System — SIH26168
-(ISRO / Department of Space, Smart Vehicles).
+AI/ML Intelligent Dead Reckoning & GNSS+INS Navigation System
 
 ## Current status: Phase 0 (scaffold only)
 
@@ -46,7 +45,7 @@ against.
 10. Edge engine (external IMU, ~200Hz)
 11. System integration testing
 12. Benchmarking against IO-VNBD (drift < 10% target)
-13. SIH demo hardening
+13. Demo hardening
 
 ## Working method
 

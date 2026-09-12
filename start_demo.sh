@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Navigators - SIH Demo Startup Script
+# Navigators - Demo Startup Script
 
 echo "=================================================="
 echo "    Navigators: AI/ML Intelligent Dead Reckoning  "
-echo "    SIH26168 - Demo Initialization                "
+echo "    Demo Initialization                           "
 echo "=================================================="
 
 # Ensure virtual environment is active

@@ -2,7 +2,7 @@
 
 **Status:** NOT IMPLEMENTED
 
-**Purpose:** Real-time (WebSocket/SSE) desktop dashboard: live navigation, IMU, AI, training, session history, evaluation, judge mode.
+**Purpose:** Real-time (WebSocket/SSE) desktop dashboard: live navigation, IMU, AI, training, session history, evaluation.
 
 **Populated in:** Phase 9
 

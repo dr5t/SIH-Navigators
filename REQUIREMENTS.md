@@ -1,6 +1,6 @@
 # Navigators — Requirements & Traceability Matrix
 
-**SIH Problem Statement:** SIH26168 — AI/ML based intelligent dead reckoning
+**Problem Statement:** AI/ML based intelligent dead reckoning
 mechanism for GNSS-denied navigation, using smartphone IMU + GNSS only (no
 OBD-II / CAN / wheel-speed dependency).
 

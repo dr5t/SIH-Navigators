@@ -8,11 +8,7 @@ export default defineConfig({
     target: 'esnext',
     minify: 'esbuild',
     rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom', 'lucide-react', 'recharts'],
-        }
-      }
+      output: {}
     }
   }
 })
