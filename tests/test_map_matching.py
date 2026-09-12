@@ -1,6 +1,6 @@
 from navigation_core.map_matching.offline_map import OfflineMapProvider, RoadSegment
 from navigation_core.map_matching.matcher import MapMatcher
-from navigation_core.state import NavigationState
+from navigation_core.state import NavigationState, NavigationMode
 
 class MockMapProvider(OfflineMapProvider):
     def __init__(self):
@@ -33,10 +33,15 @@ def test_map_matcher_scoring():
         latitude=0.0005,
         longitude=0.0001, # Close to R1 (which is at lon 0.0)
         altitude=0.0,
-        velocity_north=10.0, # Heading North (along R1)
+        velocity_north=10.0,
         velocity_east=0.0,
-        velocity_down=0.0,
-        pos_uncertainty=10.0
+        velocity_up=0.0,
+        roll=0.0,
+        pitch=0.0,
+        yaw=0.0,
+        mode=NavigationMode.DEAD_RECKONING,
+        pos_uncertainty=10.0,
+        vel_uncertainty=1.0
     )
     
     candidates = matcher.score_candidates(state, provider.segments)
@@ -56,8 +61,13 @@ def test_map_matcher_continuity():
         altitude=0.0,
         velocity_north=10.0,
         velocity_east=0.0,
-        velocity_down=0.0,
-        pos_uncertainty=10.0
+        velocity_up=0.0,
+        roll=0.0,
+        pitch=0.0,
+        yaw=0.0,
+        mode=NavigationMode.DEAD_RECKONING,
+        pos_uncertainty=10.0,
+        vel_uncertainty=1.0
     )
     
     candidates = matcher.score_candidates(state, provider.segments)

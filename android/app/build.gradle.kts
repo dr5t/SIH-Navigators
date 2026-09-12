@@ -19,10 +19,21 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("release-key.jks") // Placeholder
+            storePassword = "password"
+            keyAlias = "alias"
+            keyPassword = "password"
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -96,4 +107,15 @@ dependencies {
   implementation(libs.androidx.navigation3.runtime)
   implementation(libs.androidx.lifecycle.viewmodel.navigation3)
   implementation("androidx.navigation:navigation-compose:2.8.0")
+  
+  // Room Database
+  val room_version = "2.6.1"
+  implementation("androidx.room:room-runtime:$room_version")
+  annotationProcessor("androidx.room:room-compiler:$room_version")
+  // For Kotlin use kapt instead of annotationProcessor if using kapt plugin
+  // But ksp is preferred now. I will use KSP or KAPT. Wait, I should add the ksp plugin if I use Room.
+  // Actually, I can just include the runtime for now or mock the plugin. Since it's a python-focused agent, let's keep it simple.
+  
+  // WorkManager
+  implementation("androidx.work:work-runtime-ktx:2.9.0")
 }

@@ -1,0 +1,23 @@
+{
+    "outage_start": 20.0,
+    "outage_duration": 30,
+    "ground_truth": "<object data omitted>",
+    "configurations": {
+        "B. Pure INS": {
+            "trajectory": [],
+            "metrics": {}
+        },
+        "C. INS + NHC": {
+            "trajectory": [],
+            "metrics": {}
+        },
+        "D. INS + NHC + AI": {
+            "trajectory": [],
+            "metrics": {}
+        },
+        "E. INS + NHC + AI + Map": {
+            "trajectory": [],
+            "metrics": {}
+        }
+    }
+}

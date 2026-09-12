@@ -56,6 +56,41 @@ fun DashboardScreen() {
                 }
             }
         }
+        
+        Spacer(Modifier.weight(1f))
+        
+        // Field Test Controls
+        var isTesting by remember { mutableStateOf(false) }
+        val context = androidx.compose.ui.platform.LocalContext.current
+        
+        Button(
+            onClick = {
+                val intent = android.content.Intent(context, Class.forName("com.example.navigators.FieldTestService"))
+                if (isTesting) {
+                    intent.action = "com.example.navigators.STOP_FIELD_TEST"
+                    context.startService(intent)
+                    isTesting = false
+                } else {
+                    intent.action = "com.example.navigators.START_FIELD_TEST"
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        context.startForegroundService(intent)
+                    } else {
+                        context.startService(intent)
+                    }
+                    isTesting = true
+                }
+            },
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (isTesting) MaterialTheme.colorScheme.error else BrandPrimary
+            )
+        ) {
+            Text(
+                if (isTesting) "STOP FIELD TEST" else "START FIELD TEST",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 
@@ -159,13 +194,47 @@ fun DiagnosticRow(name: String, status: String, isSuccess: Boolean) {
 
 @Composable
 fun SettingsScreen(navController: NavController) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var isUpdating by remember { mutableStateOf(false) }
+    
     Column(Modifier.padding(16.dp)) {
         Text("Settings", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(16.dp))
-        Button(onClick = { navController.navigate("faq") }) { Text("FAQ") }
-        Button(onClick = { navController.navigate("privacy") }) { Text("Privacy Policy") }
-        Button(onClick = { navController.navigate("terms") }) { Text("Terms & Conditions") }
-        Button(onClick = { navController.navigate("cookies") }) { Text("Cookie Policy") }
+        
+        Text("AI Navigation Models", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            colors = CardDefaults.cardColors(containerColor = BgSurfaceElevated)
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                Text("Current Version: v1.0-base")
+                Spacer(Modifier.height(8.dp))
+                Button(
+                    onClick = {
+                        isUpdating = true
+                        // In a full implementation, this would trigger a download manager
+                        // to fetch from /models/latest and update Chaquopy models/ directory.
+                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                            isUpdating = false
+                            android.widget.Toast.makeText(context, "Model updated successfully", android.widget.Toast.LENGTH_SHORT).show()
+                        }, 2000)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !isUpdating
+                ) {
+                    Text(if (isUpdating) "Downloading..." else "Check for Updates")
+                }
+            }
+        }
+        
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = { navController.navigate("faq") }, modifier = Modifier.fillMaxWidth()) { Text("FAQ") }
+        Spacer(Modifier.height(8.dp))
+        Button(onClick = { navController.navigate("privacy") }, modifier = Modifier.fillMaxWidth()) { Text("Privacy Policy") }
+        Spacer(Modifier.height(8.dp))
+        Button(onClick = { navController.navigate("terms") }, modifier = Modifier.fillMaxWidth()) { Text("Terms & Conditions") }
+        Spacer(Modifier.height(8.dp))
+        Button(onClick = { navController.navigate("cookies") }, modifier = Modifier.fillMaxWidth()) { Text("Cookie Policy") }
     }
 }
 

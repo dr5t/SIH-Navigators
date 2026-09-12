@@ -10,8 +10,8 @@ class PythonBridge {
         module.callAttr("NavigationEngine", 37.7749, -122.4194, 10.0)
     }
 
-    fun processImu(accel: FloatArray, gyro: FloatArray, dt: Double, timestamp: Double): Map<String, Any> {
-        val state = fusionEngine.callAttr("process_imu", accel, gyro, dt, timestamp)
+    fun processImu(accel: FloatArray, gyro: FloatArray, dt: Double, timestamp: Double, isExternal: Boolean = false): Map<String, Any> {
+        val state = fusionEngine.callAttr("process_imu", accel, gyro, dt, timestamp, isExternal)
         return state.asMap().mapKeys { it.key.toString() }.mapValues { it.value.toString() }
     }
 

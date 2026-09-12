@@ -12,7 +12,10 @@ class ErrorStateEKF:
     - Accelerometer bias error (3)
     - Gyroscope bias error (3)
     """
-    def __init__(self, initial_pos=np.zeros(3), initial_vel=np.zeros(3), initial_q=Quaternion()):
+    def __init__(self, initial_pos=None, initial_vel=None, initial_q=None):
+        if initial_pos is None: initial_pos = np.zeros(3)
+        if initial_vel is None: initial_vel = np.zeros(3)
+        if initial_q is None: initial_q = Quaternion()
         self.ins = INSPropagator(pos_enu=initial_pos, vel_enu=initial_vel, q=initial_q)
         
         self.accel_bias = np.zeros(3)
@@ -67,9 +70,10 @@ class ErrorStateEKF:
         # Propagate Covariance
         self.P = F @ self.P @ F.T + self.Q * dt
         
-    def update_gnss(self, gnss_pos: np.ndarray, gnss_vel: np.ndarray, R_meas: np.ndarray):
+    def update_gnss(self, gnss_pos: np.ndarray, gnss_vel: np.ndarray, R_meas: np.ndarray) -> bool:
         """
         Update step using GNSS position and velocity.
+        Returns True if accepted (or adaptively downweighted), False if rejected (massive outlier).
         """
         # Measurement matrix H (6x15): observing pos and vel error
         H = np.zeros((6, 15))
@@ -84,13 +88,30 @@ class ErrorStateEKF:
         # Kalman Gain
         S = H @ self.P @ H.T + R_meas
         
-        # Chi-square gating (prevent huge jumps)
-        # For 6 DoF, 99% confidence interval threshold is ~16.8
+        # Chi-square gating for outlier rejection / adaptive weighting
+        # For 6 DoF, 95% threshold is ~12.6, 99% is ~16.8. We'll use more conservative bounds.
         gamma = z.T @ np.linalg.inv(S) @ z
-        if gamma > 25.0:
-            # Massive jump detected (e.g. recovering from a huge DR error).
-            # Instead of a full update, we can cap the innovation or inflate R_meas
-            R_meas = R_meas * (gamma / 5.0)
+        
+        if gamma > 50.0:
+            # Absolute massive jump, indicating an outlier or multipath that is completely disconnected
+            # from our expected state uncertainty. REJECT completely.
+            return False
+            
+        elif gamma > 15.0:
+            # Suspiciously high jump. Could be returning from DR drift, or it could be multipath.
+            # We adaptively inflate the measurement covariance (R_meas) to trust it less.
+            # This allows the filter to pull slowly towards GNSS without snapping.
+            inflation_factor = gamma / 10.0
+            
+            # Check for vertical vs horizontal multipath (Urban Canyon)
+            # If altitude error is dominating the innovation, inflate altitude variance more
+            z_horiz_sq = z[0]**2 + z[1]**2
+            z_vert_sq = z[2]**2
+            if z_vert_sq > z_horiz_sq * 5:
+                R_meas[2, 2] *= (inflation_factor * 2.0)
+            else:
+                R_meas = R_meas * inflation_factor
+                
             S = H @ self.P @ H.T + R_meas
             
         K = self.P @ H.T @ np.linalg.inv(S)
@@ -101,9 +122,11 @@ class ErrorStateEKF:
         # Update nominal state
         self._inject_error(dx)
         
-        # Update Covariance
+        # Update Covariance (Joseph form for stability)
         I = np.eye(15)
         self.P = (I - K @ H) @ self.P @ (I - K @ H).T + K @ R_meas @ K.T
+        
+        return True
         
     def _inject_error(self, dx: np.ndarray):
         """

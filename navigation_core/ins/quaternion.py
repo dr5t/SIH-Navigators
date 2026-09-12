@@ -6,7 +6,9 @@ class Quaternion:
     Quaternion class for INS rotation management.
     Uses scalar-first [w, x, y, z] convention internally.
     """
-    def __init__(self, q: np.ndarray = np.array([1.0, 0.0, 0.0, 0.0])):
+    def __init__(self, q: np.ndarray = None):
+        if q is None:
+            q = np.array([1.0, 0.0, 0.0, 0.0])
         self.q = np.array(q, dtype=float)
         self.normalize()
         

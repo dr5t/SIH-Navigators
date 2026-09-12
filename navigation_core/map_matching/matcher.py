@@ -37,14 +37,14 @@ class MapMatcher:
         
         l2 = bx**2 + by**2
         if l2 == 0:
-            return self.provider._haversine(p_lat, p_lon, a_lat, a_lon), a_lat, a_lon, 0.0
+            return RoadSegment._haversine(p_lat, p_lon, a_lat, a_lon), a_lat, a_lon, 0.0
             
         t = max(0.0, min(1.0, (px*bx + py*by) / l2))
         
         proj_x, proj_y = a_lon * lon_to_m + t * bx, a_lat * lat_to_m + t * by
         proj_lon, proj_lat = proj_x / lon_to_m, proj_y / lat_to_m
         
-        dist = self.provider._haversine(p_lat, p_lon, proj_lat, proj_lon)
+        dist = RoadSegment._haversine(p_lat, p_lon, proj_lat, proj_lon)
         heading = (math.degrees(math.atan2(bx, by)) + 360) % 360
         
         return dist, proj_lat, proj_lon, heading

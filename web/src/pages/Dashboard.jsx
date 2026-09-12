@@ -5,10 +5,34 @@ export default function Dashboard() {
   const [status, setStatus] = useState({
     internet: 'Online',
     gnss: 'GNSS + INS',
-    speed: 45,
-    heading: 270,
+    speed: 0,
+    heading: 0,
     syncQueue: 0
   });
+
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:8000/telemetry/live');
+    
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      if (msg.type === 'telemetry_batch' && msg.data && msg.data.length > 0) {
+        // Get latest point in batch
+        const latest = msg.data[msg.data.length - 1];
+        setStatus(prev => ({
+          ...prev,
+          speed: Math.round(latest.speed * 3.6), // Convert m/s to km/h
+          heading: Math.round(latest.heading || 0),
+          gnss: latest.mode || prev.gnss
+        }));
+      }
+    };
+
+    ws.onclose = () => {
+      setStatus(prev => ({ ...prev, internet: 'Offline (Cloud disconnected)' }));
+    };
+
+    return () => ws.close();
+  }, []);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>

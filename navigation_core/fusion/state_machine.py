@@ -5,6 +5,7 @@ class NavigationMode(Enum):
     INITIALIZING = auto()
     GNSS_GOOD = auto()
     GNSS_DEGRADED = auto()
+    GNSS_REJECTED = auto()
     DEAD_RECKONING = auto()
     DEAD_RECKONING_DEGRADED = auto()
     
@@ -13,21 +14,42 @@ class NavigationStateMachine:
         self.mode = NavigationMode.INITIALIZING
         self.last_gnss_time = 0.0
         self.dr_start_time = 0.0
+        self.consecutive_good_gnss = 0
         
-    def process_gnss(self, gnss: GNSSMeasurement, current_time: float, current_state: 'NavigationState' = None) -> NavigationMode:
+    def process_gnss(self, gnss: GNSSMeasurement, current_time: float, current_state: 'NavigationState' = None, rejected_by_filter: bool = False) -> NavigationMode:
         """Evaluates GNSS measurement and updates the state machine."""
         
-        # GNSS Recovery Validation (Phase 17)
-        if self.mode in [NavigationMode.DEAD_RECKONING, NavigationMode.DEAD_RECKONING_DEGRADED] and current_state:
+        if rejected_by_filter:
+            self.mode = NavigationMode.GNSS_REJECTED
+            self.consecutive_good_gnss = 0
+            # If we were in DR, we remain essentially in DR, but we mark it as GNSS_REJECTED
+            # Alternatively, if we reject, we can just treat it as an outage.
+            self._enter_dr(current_time)
+            return self.mode
+            
+        # GNSS Recovery Validation
+        if self.mode in [NavigationMode.DEAD_RECKONING, NavigationMode.DEAD_RECKONING_DEGRADED, NavigationMode.GNSS_REJECTED] and current_state:
             # If GNSS comes back, check if it's wildly inconsistent with our map-matched state
             if gnss.quality != GNSSQuality.GOOD and current_state.map_status == "COVERAGE_GOOD":
-                # If we have a good map match and GNSS is degraded, we might want to reject it
-                # to prevent teleportation
                 if current_state.map_match_confidence > 0.8:
-                    # Very crude validation: if GNSS is poor but map match is strong, ignore GNSS
+                    # Ignore GNSS until we get a high-quality fix
+                    self.mode = NavigationMode.GNSS_REJECTED
+                    self.consecutive_good_gnss = 0
+                    self._enter_dr(current_time)
+                    return self.mode
+                    
+            # Require 3 consecutive good GNSS updates to recover from a long DR session to avoid initial jumps
+            time_in_dr = current_time - self.dr_start_time
+            if time_in_dr > 10.0 and gnss.quality == GNSSQuality.GOOD:
+                if self.consecutive_good_gnss < 2:
+                    self.consecutive_good_gnss += 1
+                    # Still treat as rejected/DR until we have consistency
+                    self.mode = NavigationMode.GNSS_REJECTED
+                    self._enter_dr(current_time)
                     return self.mode
                     
         self.last_gnss_time = current_time
+        self.consecutive_good_gnss += 1
         
         if gnss.quality == GNSSQuality.GOOD:
             self.mode = NavigationMode.GNSS_GOOD

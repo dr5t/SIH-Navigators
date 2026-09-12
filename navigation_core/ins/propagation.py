@@ -6,7 +6,11 @@ class INSPropagator:
     Propagates navigation state (position, velocity, orientation) using 
     IMU data (specific force and angular rate).
     """
-    def __init__(self, pos_enu=np.zeros(3), vel_enu=np.zeros(3), q=Quaternion()):
+    def __init__(self, pos_enu=None, vel_enu=None, q=None):
+        if pos_enu is None: pos_enu = np.zeros(3)
+        if vel_enu is None: vel_enu = np.zeros(3)
+        if q is None: q = Quaternion()
+        
         self.pos = np.array(pos_enu, dtype=float)
         self.vel = np.array(vel_enu, dtype=float)
         self.q = q

@@ -4,9 +4,11 @@ import './styles.css';
 
 import Dashboard from './pages/Dashboard';
 import Navigation from './pages/Navigation';
-
 import Diagnostics from './pages/Diagnostics';
-import Sessions from './pages/Sessions';
+import SessionsList from './pages/SessionsList';
+import SessionReport from './pages/SessionReport';
+import Benchmark from './pages/Benchmark';
+import Demo from './pages/Demo';
 
 const History = () => <div className="card"><h2>History</h2><p>Diagnostic history.</p></div>;
 const SettingsPage = () => <div className="card"><h2>Settings</h2><p>App configuration.</p></div>;
@@ -37,6 +39,12 @@ const AppShell = ({ children }) => {
           <NavLink to="/sessions" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
             <List size={18} style={{marginRight: '8px'}}/> Sessions
           </NavLink>
+          <NavLink to="/benchmark" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
+            <Activity size={18} style={{marginRight: '8px'}}/> Benchmarks
+          </NavLink>
+          <NavLink to="/demo" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
+            <FileText size={18} style={{marginRight: '8px'}}/> Demo View
+          </NavLink>
           <NavLink to="/settings" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
             <Settings size={18} style={{marginRight: '8px'}}/> Settings
           </NavLink>
@@ -66,7 +74,10 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/navigation" element={<Navigation />} />
           <Route path="/diagnostics" element={<Diagnostics />} />
-          <Route path="/sessions" element={<Sessions />} />
+          <Route path="/sessions" element={<SessionsList />} />
+          <Route path="/sessions/:id" element={<SessionReport />} />
+          <Route path="/benchmark" element={<Benchmark />} />
+          <Route path="/demo" element={<Demo />} />
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/faq" element={<FAQ />} />

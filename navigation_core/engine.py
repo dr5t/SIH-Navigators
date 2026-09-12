@@ -53,14 +53,15 @@ class NavigationEngine:
         self.current_time = 0.0
         self.last_state = self._build_state()
 
-    def process_imu(self, accel: np.ndarray, gyro: np.ndarray, dt: float, timestamp: float) -> Dict[str, Any]:
+    def process_imu(self, accel: np.ndarray, gyro: np.ndarray, dt: float, timestamp: float, is_external: bool = False) -> Dict[str, Any]:
         """
-        Processes a single IMU tick. Called directly from Android SensorEventListener.
+        Processes a single IMU tick. Called directly from Android SensorEventListener or ExternalImuService.
         """
         self.current_time = timestamp
         
         # Sync & Health (Phase 2)
-        meas = IMUMeasurement(timestamp, SensorType.ACCELEROMETER, accel[0], accel[1], accel[2], 1.0, SensorSource.LIVE_ANDROID, 0)
+        source = SensorSource.LIVE_ANDROID if not is_external else SensorSource.EXTERNAL
+        meas = IMUMeasurement(timestamp, SensorType.ACCELEROMETER, accel[0], accel[1], accel[2], 1.0, source, 0)
         health = self.sync.check_health(meas)
         
         # Attitude (Phase 4)
@@ -115,6 +116,12 @@ class NavigationEngine:
         """
         Processes a single GNSS tick.
         """
+        # Latency/Staleness Check
+        # If the GNSS timestamp is significantly older than our current time, it's stale
+        if self.current_time > 0 and (self.current_time - timestamp) > 1.5:
+            # Stale GNSS, ignore completely to prevent backward time jumps
+            return self._state_to_dict()
+            
         self.current_time = timestamp
         
         quality = GNSSQuality.GOOD if h_acc < 10.0 else GNSSQuality.DEGRADED
@@ -123,18 +130,24 @@ class NavigationEngine:
         # Sync & Health
         health = self.sync.sync_gnss(meas)
         
-        # State Machine
-        self.state_machine.process_gnss(meas, timestamp, self.last_state)
+        # Speed inconsistency check
+        ins_speed = np.linalg.norm(self.eskf.ins.vel)
+        if abs(speed - ins_speed) > 15.0: # m/s (approx 54 km/h jump)
+            # Gross speed inconsistency, likely an outlier
+            quality = GNSSQuality.DEGRADED
+            meas.quality = quality
+            h_acc = max(h_acc, 20.0) # Inflate reported accuracy
+
+        # State Machine process initially
+        mode_before = self.state_machine.process_gnss(meas, timestamp, self.last_state)
         
-        if self.state_machine.mode in [NavigationMode.GNSS_GOOD, NavigationMode.GNSS_DEGRADED]:
+        if mode_before in [NavigationMode.GNSS_GOOD, NavigationMode.GNSS_DEGRADED]:
             # Convert speed/course to VN, VE
             course_rad = np.radians(course)
             vn = speed * np.cos(course_rad)
             ve = speed * np.sin(course_rad)
             vd = 0.0 # Assuming mostly flat for basic GNSS
             
-            # Use gnss_fusion logic from Phase 10
-            # For brevity, using raw ENU conversion here
             from navigation_core.ins.coordinates import lla_to_enu
             pos_enu = lla_to_enu(lat, lon, alt, self.ref_lat, self.ref_lon, self.ref_alt)
             vel_enu = np.array([ve, vn, -vd])
@@ -143,7 +156,11 @@ class NavigationEngine:
             R_meas[0:3, 0:3] = np.eye(3) * (h_acc ** 2)
             R_meas[3:6, 3:6] = np.eye(3) * ((h_acc/2.0) ** 2)
             
-            self.eskf.update_gnss(pos_enu, vel_enu, R_meas)
+            accepted = self.eskf.update_gnss(pos_enu, vel_enu, R_meas)
+            if not accepted:
+                # The ESKF rejected the measurement (massive outlier)
+                # Re-evaluate state machine with rejection flag
+                self.state_machine.process_gnss(meas, timestamp, self.last_state, rejected_by_filter=True)
             
         self.last_state = self._build_state()
         return self._state_to_dict()
