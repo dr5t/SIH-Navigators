@@ -1,4 +1,4 @@
-package com.isro.navigators
+package com.example.navigators
 
 import com.chaquo.python.Python
 import com.chaquo.python.PyObject

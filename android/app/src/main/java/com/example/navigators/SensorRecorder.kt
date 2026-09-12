@@ -1,4 +1,4 @@
-package com.isro.navigators
+package com.example.navigators
 
 import android.content.Context
 import android.hardware.Sensor
