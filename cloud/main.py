@@ -5,6 +5,15 @@ import time
 from .database import SessionLocal, SessionRecord, TelemetryBatch
 from .auth import verify_token, create_access_token
 import json
+import math
+
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371000 # radius in meters
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = math.sin(dphi/2)**2 + math.cos(phi1)*math.cos(phi2)*math.sin(dlambda/2)**2
+    return 2 * R * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 app = FastAPI(title="Navigators Cloud")
 
@@ -134,6 +143,185 @@ def get_session_report(session_id: str, db: Session = Depends(get_db)):
         "device_id": session_record.device_id,
         "total_points": len(all_points),
         "telemetry": all_points
+    }
+
+@app.get("/sessions/{session_id}/summary")
+def get_session_summary(session_id: str, db: Session = Depends(get_db)):
+    session_record = db.query(SessionRecord).filter(SessionRecord.id == session_id).first()
+    if not session_record:
+        raise HTTPException(status_code=404, detail="Session not found")
+        
+    batches = db.query(TelemetryBatch).filter(TelemetryBatch.session_id == session_id).order_by(TelemetryBatch.id).all()
+    all_points = []
+    for b in batches:
+        all_points.extend(b.data)
+    all_points.sort(key=lambda x: x.get("timestamp", 0))
+    
+    if not all_points:
+        return {"status": "no_data"}
+        
+    total_distance = 0.0
+    dr_distance = 0.0
+    max_speed = 0.0
+    sum_speed = 0.0
+    gnss_time = 0
+    dr_time = 0
+    outages = 0
+    max_uncertainty = 0.0
+    sum_uncertainty = 0.0
+    
+    gnss_points_count = 0
+    sum_gnss_uncertainty = 0.0
+    dr_points_count = 0
+    max_dr_uncertainty = 0.0
+    
+    events = []
+    
+    start_time = all_points[0].get("timestamp", 0)
+    end_time = all_points[-1].get("timestamp", 0)
+    duration = max(0, (end_time - start_time) / 1000)
+    
+    prev_point = None
+    prev_mode = None
+    
+    for p in all_points:
+        mode = p.get("mode", "")
+        speed = p.get("speed", 0.0)
+        hAcc = p.get("hAcc", 0.0)
+        ts = p.get("timestamp", 0)
+        
+        max_speed = max(max_speed, speed)
+        sum_speed += speed
+        max_uncertainty = max(max_uncertainty, hAcc)
+        sum_uncertainty += hAcc
+        
+        if "GNSS" in mode:
+            gnss_points_count += 1
+            sum_gnss_uncertainty += hAcc
+        elif "DEAD_RECKONING" in mode:
+            dr_points_count += 1
+            max_dr_uncertainty = max(max_dr_uncertainty, hAcc)
+        
+        if prev_mode != mode:
+            if "DEAD_RECKONING" in mode and prev_mode and "GNSS" in prev_mode:
+                outages += 1
+                events.append({"type": "GNSS_LOST", "timestamp": ts, "message": "GNSS Signal Lost - DR Started"})
+            elif "GNSS" in mode and prev_mode and "DEAD_RECKONING" in prev_mode:
+                events.append({"type": "GNSS_RECOVERED", "timestamp": ts, "message": "GNSS Signal Recovered"})
+            elif "MAP_MATCH" in mode:
+                events.append({"type": "MAP_MATCHED", "timestamp": ts, "message": "Trajectory map-matched"})
+            prev_mode = mode
+            
+        if prev_point:
+            dt = max(0, (ts - prev_point.get("timestamp", 0)) / 1000)
+            if "GNSS" in mode:
+                gnss_time += dt
+            else:
+                dr_time += dt
+                
+            dist = haversine(prev_point.get("lat", 0), prev_point.get("lon", 0), p.get("lat", 0), p.get("lon", 0))
+            total_distance += dist
+            if "DEAD_RECKONING" in mode:
+                dr_distance += dist
+                
+        prev_point = p
+        
+    events.insert(0, {"type": "SESSION_STARTED", "timestamp": start_time, "message": "Session Started"})
+    events.append({"type": "SESSION_ENDED", "timestamp": end_time, "message": "Session Ended"})
+        
+    n = len(all_points)
+    
+    score_unavailable = False
+    if duration < 10 or n < 5:
+        score_unavailable = True
+
+    overall_score = 0
+    gnss_score = 0
+    dr_score = 0
+    interruptions_score = 0
+    completeness_score = 0
+    explanation = []
+    
+    if not score_unavailable:
+        weights = 0
+        total_score_val = 0
+        
+        # 1. GNSS Quality (35%)
+        if gnss_points_count > 0:
+            avg_gnss = sum_gnss_uncertainty / gnss_points_count
+            gnss_score = max(0, min(100, 100 - (avg_gnss - 3) * 5))
+            total_score_val += gnss_score * 0.35
+            weights += 0.35
+            if gnss_score < 60:
+                explanation.append(f"Low GNSS Quality (Avg accuracy {avg_gnss:.1f}m)")
+            elif gnss_score > 90:
+                explanation.append(f"Excellent GNSS Quality")
+        
+        # 2. DR Stability (35%)
+        if dr_points_count > 0:
+            dr_score = max(0, min(100, 100 - (max_dr_uncertainty - 10) * 2))
+            total_score_val += dr_score * 0.35
+            weights += 0.35
+            if dr_score < 60:
+                explanation.append(f"Poor DR Stability (Max drift {max_dr_uncertainty:.1f}m)")
+            elif dr_score > 90:
+                explanation.append(f"Excellent DR Stability")
+                
+        # 3. Interruptions (15%)
+        interruptions_score = max(0, 100 - (outages * 10))
+        total_score_val += interruptions_score * 0.15
+        weights += 0.15
+        if outages >= 3:
+            explanation.append(f"Frequent GNSS Outages ({outages})")
+            
+        # 4. Data Completeness (15%)
+        expected_points = duration
+        completeness_score = max(0, min(100, (n / max(1, expected_points)) * 100))
+        total_score_val += completeness_score * 0.15
+        weights += 0.15
+        if completeness_score < 80:
+            explanation.append(f"Incomplete data collection ({completeness_score:.0f}%)")
+            
+        if weights > 0:
+            overall_score = round(total_score_val / weights)
+        else:
+            score_unavailable = True
+
+    quality_data = {
+        "unavailable": score_unavailable,
+        "overall_score": overall_score,
+        "gnss_score": round(gnss_score),
+        "dr_score": round(dr_score),
+        "interruptions_score": round(interruptions_score),
+        "completeness_score": round(completeness_score),
+        "explanation": explanation
+    }
+    
+    return {
+        "overview": {
+            "duration": duration,
+            "total_distance": total_distance,
+            "start_time": session_record.start_time
+        },
+        "navigation": {
+            "gnss_time": gnss_time,
+            "dr_time": dr_time,
+            "outages": outages,
+            "dr_distance": dr_distance
+        },
+        "performance": {
+            "avg_speed": sum_speed / n if n else 0,
+            "max_speed": max_speed,
+            "max_uncertainty": max_uncertainty,
+            "avg_uncertainty": sum_uncertainty / n if n else 0
+        },
+        "system": {
+            "sensor_status": "Optimal",
+            "sync_status": "Synced",
+            "model_version": "v1.5-fusion"
+        },
+        "quality": quality_data,
+        "events": events
     }
 
 @app.get("/models/latest")

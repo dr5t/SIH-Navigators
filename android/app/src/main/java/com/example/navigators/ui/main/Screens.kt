@@ -12,7 +12,7 @@ import androidx.navigation.NavController
 import com.example.navigators.theme.*
 
 @Composable
-fun DashboardScreen() {
+fun DashboardScreen(navController: NavController) {
     Column(Modifier.padding(16.dp).fillMaxSize()) {
         Text("Dashboard", style = MaterialTheme.typography.titleLarge)
         Text("Real-time navigation and sensor overview.", color = TextMuted)
@@ -70,6 +70,7 @@ fun DashboardScreen() {
                     intent.action = "com.example.navigators.STOP_FIELD_TEST"
                     context.startService(intent)
                     isTesting = false
+                    navController.navigate("summary/latest")
                 } else {
                     intent.action = "com.example.navigators.START_FIELD_TEST"
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {

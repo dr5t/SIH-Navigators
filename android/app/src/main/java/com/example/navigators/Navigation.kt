@@ -49,7 +49,8 @@ fun NavigatorsApp() {
         }
     ) { innerPadding ->
         NavHost(navController, startDestination = "dashboard", Modifier.padding(innerPadding)) {
-            composable("dashboard") { DashboardScreen() }
+            composable("dashboard") { DashboardScreen(navController) }
+            composable("summary/{sessionId}") { SummaryScreen(navController) }
             composable("navigation") { NavigationScreen() }
             composable("diagnostics") { DiagnosticsScreen() }
             composable("settings") { SettingsScreen(navController) }
