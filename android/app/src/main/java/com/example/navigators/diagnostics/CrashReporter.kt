@@ -27,7 +27,11 @@ class CrashReporter(private val context: Context) : Thread.UncaughtExceptionHand
             timestamp = System.currentTimeMillis(),
             lat = 0.0,
             lon = 0.0,
+            alt = 0.0,
             speed = 0.0,
+            course = 0.0,
+            hAcc = 0.0,
+            vAcc = 0.0,
             mode = "CRASH: ${exception.message?.take(50)}"
         )
         

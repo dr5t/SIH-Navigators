@@ -20,11 +20,8 @@ class NavigationStateMachine:
         """Evaluates GNSS measurement and updates the state machine."""
         
         if rejected_by_filter:
-            self.mode = NavigationMode.GNSS_REJECTED
             self.consecutive_good_gnss = 0
-            # If we were in DR, we remain essentially in DR, but we mark it as GNSS_REJECTED
-            # Alternatively, if we reject, we can just treat it as an outage.
-            self._enter_dr(current_time)
+            self._enter_dr(current_time, NavigationMode.GNSS_REJECTED)
             return self.mode
             
         # GNSS Recovery Validation
@@ -33,9 +30,8 @@ class NavigationStateMachine:
             if gnss.quality != GNSSQuality.GOOD and current_state.map_status == "COVERAGE_GOOD":
                 if current_state.map_match_confidence > 0.8:
                     # Ignore GNSS until we get a high-quality fix
-                    self.mode = NavigationMode.GNSS_REJECTED
                     self.consecutive_good_gnss = 0
-                    self._enter_dr(current_time)
+                    self._enter_dr(current_time, NavigationMode.GNSS_REJECTED)
                     return self.mode
                     
             # Require 3 consecutive good GNSS updates to recover from a long DR session to avoid initial jumps
@@ -44,8 +40,7 @@ class NavigationStateMachine:
                 if self.consecutive_good_gnss < 2:
                     self.consecutive_good_gnss += 1
                     # Still treat as rejected/DR until we have consistency
-                    self.mode = NavigationMode.GNSS_REJECTED
-                    self._enter_dr(current_time)
+                    self._enter_dr(current_time, NavigationMode.GNSS_REJECTED)
                     return self.mode
                     
         self.last_gnss_time = current_time
@@ -66,7 +61,7 @@ class NavigationStateMachine:
         # If we haven't received GNSS for > 2 seconds, enter DR
         time_since_gnss = current_time - self.last_gnss_time
         
-        if self.mode in [NavigationMode.GNSS_GOOD, NavigationMode.GNSS_DEGRADED, NavigationMode.INITIALIZING]:
+        if self.mode in [NavigationMode.GNSS_GOOD, NavigationMode.GNSS_DEGRADED, NavigationMode.INITIALIZING, NavigationMode.GNSS_REJECTED]:
             if time_since_gnss > 2.0:
                 self._enter_dr(current_time)
                 
@@ -78,7 +73,9 @@ class NavigationStateMachine:
                 
         return self.mode
         
-    def _enter_dr(self, current_time: float):
-        if self.mode not in [NavigationMode.DEAD_RECKONING, NavigationMode.DEAD_RECKONING_DEGRADED]:
-            self.mode = NavigationMode.DEAD_RECKONING
+    def _enter_dr(self, current_time: float, mode: NavigationMode = NavigationMode.DEAD_RECKONING):
+        if self.mode not in [NavigationMode.DEAD_RECKONING, NavigationMode.DEAD_RECKONING_DEGRADED, NavigationMode.GNSS_REJECTED]:
+            self.mode = mode
             self.dr_start_time = current_time
+        else:
+            self.mode = mode

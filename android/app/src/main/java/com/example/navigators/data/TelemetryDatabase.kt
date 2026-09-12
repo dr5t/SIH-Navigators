@@ -17,7 +17,11 @@ data class TelemetryEntity(
     val timestamp: Long,
     val lat: Double,
     val lon: Double,
+    val alt: Double,
     val speed: Double,
+    val course: Double,
+    val hAcc: Double,
+    val vAcc: Double,
     val mode: String
 )
 
@@ -39,7 +43,7 @@ interface TelemetryDao {
     fun count(): Int
 }
 
-@Database(entities = [TelemetryEntity::class], version = 1, exportSchema = false)
+@Database(entities = [TelemetryEntity::class], version = 2, exportSchema = false)
 abstract class TelemetryDatabase : RoomDatabase() {
     abstract fun telemetryDao(): TelemetryDao
 
@@ -53,7 +57,9 @@ abstract class TelemetryDatabase : RoomDatabase() {
                     context.applicationContext,
                     TelemetryDatabase::class.java,
                     "navigators_telemetry.db"
-                ).build()
+                )
+                .fallbackToDestructiveMigration()
+                .build()
                 INSTANCE = instance
                 instance
             }

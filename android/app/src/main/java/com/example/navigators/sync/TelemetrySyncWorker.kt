@@ -55,9 +55,13 @@ class TelemetrySyncWorker(
             sessionRecords.forEach { record ->
                 val obj = JSONObject().apply {
                     put("timestamp", record.timestamp)
-                    put("lat", record.lat)
-                    put("lon", record.lon)
+                    put("latitude", record.lat)
+                    put("longitude", record.lon)
+                    put("altitude", record.alt)
                     put("speed", record.speed)
+                    put("course", record.course)
+                    put("h_acc", record.hAcc)
+                    put("v_acc", record.vAcc)
                     put("mode", record.mode)
                 }
                 jsonArray.put(obj)
@@ -70,6 +74,12 @@ class TelemetrySyncWorker(
                 conn.requestMethod = "POST"
                 conn.setRequestProperty("Content-Type", "application/json; utf-8")
                 conn.setRequestProperty("Accept", "application/json")
+                
+                // Demo Authentication Token (Group A & B implementation)
+                // In production, fetch this from Android EncryptedSharedPreferences
+                val dummyToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZW1vX2RldmljZSJ9.this_is_a_mock_signature"
+                conn.setRequestProperty("Authorization", "Bearer $dummyToken")
+                
                 conn.doOutput = true
 
                 OutputStreamWriter(conn.outputStream).use { os ->

@@ -139,9 +139,18 @@ class NavigationEngine:
             h_acc = max(h_acc, 20.0) # Inflate reported accuracy
 
         # State Machine process initially
-        mode_before = self.state_machine.process_gnss(meas, timestamp, self.last_state)
+        mode_before = self.state_machine.mode
+        new_mode = self.state_machine.process_gnss(meas, timestamp, self.last_state)
         
-        if mode_before in [NavigationMode.GNSS_GOOD, NavigationMode.GNSS_DEGRADED]:
+        if mode_before == NavigationMode.INITIALIZING:
+            # Seed the ESKF with the first GNSS fix
+            from navigation_core.ins.coordinates import lla_to_enu
+            pos_enu = lla_to_enu(lat, lon, alt, self.ref_lat, self.ref_lon, self.ref_alt)
+            course_rad = np.radians(course)
+            self.eskf.ins.pos = pos_enu
+            self.eskf.ins.vel = np.array([speed * np.sin(course_rad), speed * np.cos(course_rad), 0.0])
+            
+        elif new_mode in [NavigationMode.GNSS_GOOD, NavigationMode.GNSS_DEGRADED]:
             # Convert speed/course to VN, VE
             course_rad = np.radians(course)
             vn = speed * np.cos(course_rad)
