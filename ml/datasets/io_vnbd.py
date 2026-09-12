@@ -1,7 +1,8 @@
+import os
 import pandas as pd
 import numpy as np
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 @dataclass
 class ImuData:
@@ -23,17 +24,29 @@ class GnssData:
 class IOVNBDParser:
     """
     Parses IO-VNBD dataset format.
-    Assumes CSVs with standard columns. 
-    Can be adjusted once exact schema is known.
+    Validates CSVs for NaNs, missing timestamps, and monotonicity.
     """
-    def __init__(self, imu_path: str, gnss_path: str):
-        self.imu_path = imu_path
-        self.gnss_path = gnss_path
+    def __init__(self, data_dir: str):
+        self.data_dir = data_dir
+        self.imu_path = os.path.join(data_dir, "imu.csv")
+        self.gnss_path = os.path.join(data_dir, "gnss.csv")
+
+    def exists(self) -> bool:
+        return os.path.exists(self.imu_path) and os.path.exists(self.gnss_path)
 
     def load_imu(self) -> ImuData:
+        if not os.path.exists(self.imu_path):
+            raise FileNotFoundError(f"Missing dataset file: {self.imu_path}")
+            
         df = pd.read_csv(self.imu_path)
-        # Expected cols: timestamp, ax, ay, az, gx, gy, gz, mx, my, mz
-        # If mag is missing, we ignore it
+        
+        # Validation
+        if df['timestamp'].isnull().any():
+            print(f"Warning: Dropping {df['timestamp'].isnull().sum()} IMU rows with missing timestamps.")
+            df = df.dropna(subset=['timestamp'])
+            
+        df = df.sort_values(by='timestamp')
+        
         timestamp = df['timestamp'].values
         accel = df[['ax', 'ay', 'az']].values
         gyro = df[['gx', 'gy', 'gz']].values
@@ -45,8 +58,22 @@ class IOVNBDParser:
         return ImuData(timestamp=timestamp, accel=accel, gyro=gyro, mag=mag)
     
     def load_gnss(self) -> GnssData:
+        if not os.path.exists(self.gnss_path):
+            raise FileNotFoundError(f"Missing dataset file: {self.gnss_path}")
+            
         df = pd.read_csv(self.gnss_path)
-        # Expected cols: timestamp, lat, lon, alt, speed, bearing, accuracy
+        
+        # Validation
+        if df['timestamp'].isnull().any():
+            print(f"Warning: Dropping {df['timestamp'].isnull().sum()} GNSS rows with missing timestamps.")
+            df = df.dropna(subset=['timestamp'])
+            
+        if df['speed'].isnull().any():
+            print(f"Warning: Dropping {df['speed'].isnull().sum()} GNSS rows with missing speed reference.")
+            df = df.dropna(subset=['speed'])
+            
+        df = df.sort_values(by='timestamp')
+        
         return GnssData(
             timestamp=df['timestamp'].values,
             lat=df['lat'].values,
@@ -59,3 +86,17 @@ class IOVNBDParser:
 
     def load_all(self) -> Tuple[ImuData, GnssData]:
         return self.load_imu(), self.load_gnss()
+
+def list_sessions(base_dir: str = "ml/data/io_vnbd") -> List[str]:
+    """Finds all valid IO-VNBD session directories."""
+    if not os.path.exists(base_dir):
+        return []
+    
+    sessions = []
+    for item in os.listdir(base_dir):
+        path = os.path.join(base_dir, item)
+        if os.path.isdir(path):
+            parser = IOVNBDParser(path)
+            if parser.exists():
+                sessions.append(path)
+    return sorted(sessions)

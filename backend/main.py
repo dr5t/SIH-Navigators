@@ -37,3 +37,22 @@ async def get_session(session_id: str):
     if session_id not in db:
         raise HTTPException(status_code=404, detail="Session not found")
     return db[session_id]
+
+# --- ML MODEL REGISTRY ---
+class ModelMetrics(BaseModel):
+    version: str
+    dataset: str
+    mae: float
+    rmse: float
+    status: str # TRAINING, VALIDATION, APPROVED, DEPLOYED
+
+models_db: Dict[str, ModelMetrics] = {}
+
+@app.post("/api/v1/ml/registry")
+async def register_model(data: ModelMetrics):
+    models_db[data.version] = data
+    return {"status": "success", "message": f"Model {data.version} registered."}
+
+@app.get("/api/v1/ml/registry")
+async def list_models():
+    return {"models": list(models_db.values())}

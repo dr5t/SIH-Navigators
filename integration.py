@@ -24,41 +24,42 @@ def run_integration():
                          np.array([1.0]))
     
     # 2. Initialize Edge Engine
-    edge = EdgeEngine(37.7, -122.4, 10.0)
+    from navigation_core.engine import NavigationEngine
+    edge = NavigationEngine(37.7, -122.4, 10.0)
+    
+    trajectory = []
     
     def nav_callback(imu_sample, gnss):
-        edge.process_imu(imu_sample['accel'], imu_sample['gyro'], 0.01, imu_sample['timestamp'])
+        state = edge.process_imu(imu_sample['accel'], imu_sample['gyro'], 0.01, imu_sample['timestamp'])
         
         # If GNSS is available at this timestamp, process it
         if len(gnss.timestamp) > 0 and abs(gnss.timestamp[0] - imu_sample['timestamp']) < 0.01:
             speed = gnss.speed[0]
-            bearing = np.radians(gnss.bearing[0])
-            vn = speed * np.cos(bearing)
-            ve = speed * np.sin(bearing)
+            bearing = gnss.bearing[0]
             
-            edge.process_gnss(gnss.lat[0], gnss.lon[0], gnss.alt[0], 
-                              vn, ve, 0.0, 
-                              gnss.accuracy[0], gnss.accuracy[0])
+            state = edge.process_gnss(gnss.lat[0], gnss.lon[0], gnss.alt[0], 
+                               speed, bearing, gnss.accuracy[0], gnss.timestamp[0])
+            
+        trajectory.append(state)
             
     # 3. Replay through engine
     replay = ReplayEngine(imu_data, gnss_data, nav_callback)
-    print("Running Edge Engine simulation...")
+    print("Running Engine simulation...")
     replay.play(speed=0)  # Run as fast as possible
     
     # 4. Extract trajectory and sync to backend
-    traj = edge.trajectory
     payload = {
         "session_id": "sim_session_001",
         "device_id": "sim_device",
         "trajectory": [
             {
                 "timestamp": pt['timestamp'],
-                "lat": 37.7 + pt['pos'][1] / 111000.0,  # Approximate ENU to LLA
-                "lon": -122.4 + pt['pos'][0] / (111000.0 * np.cos(np.radians(37.7))),
-                "alt": 10.0 + pt['pos'][2],
-                "speed": np.linalg.norm(pt['vel']),
-                "heading": 0.0
-            } for pt in traj
+                "lat": pt['lat'],
+                "lon": pt['lon'],
+                "alt": pt['alt'],
+                "speed": pt['speed'],
+                "heading": pt['course']
+            } for pt in trajectory
         ]
     }
     
