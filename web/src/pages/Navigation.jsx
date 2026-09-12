@@ -56,10 +56,21 @@ export default function Navigation() {
           position: 'absolute', bottom: '20px', left: '20px', zIndex: 1000, 
           background: 'var(--bg-surface-elevated)', padding: 'var(--space-4)',
           borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)',
-          boxShadow: 'var(--shadow-md)'
+          boxShadow: 'var(--shadow-md)',
+          display: 'flex', gap: 'var(--space-6)'
         }}>
-           <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Current Speed</div>
-           <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>45 <span style={{fontSize: '1rem'}}>km/h</span></div>
+           <div>
+             <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Current Speed</div>
+             <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>45 <span style={{fontSize: '1rem'}}>km/h</span></div>
+           </div>
+           
+           <div style={{ borderLeft: '1px solid var(--border-light)', paddingLeft: 'var(--space-4)' }}>
+             <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>Map Matching</div>
+             <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--success)', marginTop: 'var(--space-1)' }}>
+                Active (Conf: 0.92)
+             </div>
+             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Road: Main St</div>
+           </div>
         </div>
       </div>
     </div>

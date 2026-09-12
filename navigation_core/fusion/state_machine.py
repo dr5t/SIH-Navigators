@@ -14,8 +14,19 @@ class NavigationStateMachine:
         self.last_gnss_time = 0.0
         self.dr_start_time = 0.0
         
-    def process_gnss(self, gnss: GNSSMeasurement, current_time: float) -> NavigationMode:
+    def process_gnss(self, gnss: GNSSMeasurement, current_time: float, current_state: 'NavigationState' = None) -> NavigationMode:
         """Evaluates GNSS measurement and updates the state machine."""
+        
+        # GNSS Recovery Validation (Phase 17)
+        if self.mode in [NavigationMode.DEAD_RECKONING, NavigationMode.DEAD_RECKONING_DEGRADED] and current_state:
+            # If GNSS comes back, check if it's wildly inconsistent with our map-matched state
+            if gnss.quality != GNSSQuality.GOOD and current_state.map_status == "COVERAGE_GOOD":
+                # If we have a good map match and GNSS is degraded, we might want to reject it
+                # to prevent teleportation
+                if current_state.map_match_confidence > 0.8:
+                    # Very crude validation: if GNSS is poor but map match is strong, ignore GNSS
+                    return self.mode
+                    
         self.last_gnss_time = current_time
         
         if gnss.quality == GNSSQuality.GOOD:

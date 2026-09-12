@@ -31,6 +31,13 @@ class NavigationState:
     # Metadata
     speed_source: str = "GNSS" # "GNSS", "AI", "KINEMATIC"
     
+    # Map Matching
+    map_matched_lat: Optional[float] = None
+    map_matched_lon: Optional[float] = None
+    matched_road_id: Optional[str] = None
+    map_match_confidence: float = 0.0
+    map_status: str = "UNKNOWN"
+    
     @property
     def speed_m_s(self) -> float:
         import math

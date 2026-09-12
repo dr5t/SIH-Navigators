@@ -81,9 +81,17 @@ fun NavigationScreen() {
                 shape = MaterialTheme.shapes.medium,
                 modifier = Modifier.padding(16.dp).align(androidx.compose.ui.Alignment.BottomStart)
             ) {
-                Column(Modifier.padding(16.dp)) {
-                    Text("Current Speed", color = TextMuted, style = MaterialTheme.typography.labelSmall)
-                    Text("45 km/h", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                Row(Modifier.padding(16.dp)) {
+                    Column {
+                        Text("Current Speed", color = TextMuted, style = MaterialTheme.typography.labelSmall)
+                        Text("45 km/h", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(Modifier.width(24.dp))
+                    Column {
+                        Text("Map Matching", color = TextMuted, style = MaterialTheme.typography.labelSmall)
+                        Text("Active (92%)", color = StatusSuccess, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text("Road: Main St", color = TextMuted, style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
         }

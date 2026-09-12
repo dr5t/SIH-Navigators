@@ -2,6 +2,7 @@ plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.compose.compiler)
   alias(libs.plugins.kotlin.serialization)
+  alias(libs.plugins.chaquopy)
 }
 
 android {
@@ -13,6 +14,9 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        ndk {
+            abiFilters += listOf("arm64-v8a", "x86_64")
+        }
     }
 
     buildTypes {
@@ -41,6 +45,16 @@ android {
 
 kotlin {
     jvmToolchain(17)
+}
+
+chaquopy {
+    defaultConfig {
+        version = "3.10"
+        pip {
+            install("numpy")
+            install("torch")
+        }
+    }
 }
 
 dependencies {

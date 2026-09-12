@@ -4,13 +4,10 @@ import com.chaquo.python.Python
 import com.chaquo.python.PyObject
 
 class PythonBridge {
-    private val py: Python = Python.getInstance()
-    private val fusionEngine: PyObject
-
-    init {
+    private val py by lazy { Python.getInstance() }
+    private val fusionEngine by lazy {
         val module = py.getModule("navigation_core.engine")
-        // Initialize with dummy reference LLA
-        fusionEngine = module.callAttr("NavigationEngine", 37.7749, -122.4194, 10.0)
+        module.callAttr("NavigationEngine", 37.7749, -122.4194, 10.0)
     }
 
     fun processImu(accel: FloatArray, gyro: FloatArray, dt: Double, timestamp: Double): Map<String, Any> {

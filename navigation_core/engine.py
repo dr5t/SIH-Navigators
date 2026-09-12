@@ -9,6 +9,8 @@ from navigation_core.fusion.state_machine import NavigationStateMachine, Navigat
 from navigation_core.fusion.eskf import ErrorStateEKF
 from navigation_core.ai.speed_estimator import AISpeedEstimator
 from navigation_core.constraints.vehicle import NonHolonomicConstraints
+from navigation_core.map_matching.offline_map import LocalMapPackage
+from navigation_core.map_matching.matcher import MapMatcher
 from navigation_core.state import NavigationState
 
 class NavigationEngine:
@@ -39,6 +41,11 @@ class NavigationEngine:
         
         # Phase 10: ESKF
         self.eskf = ErrorStateEKF()
+        
+        # Map Matching
+        self.map_provider = LocalMapPackage("map_package.json")
+        self.map_provider.load_region("default") # Attempts to load if exists
+        self.map_matcher = MapMatcher(self.map_provider)
         
         # History for AI Model (sliding window)
         self.accel_window = []
@@ -73,6 +80,35 @@ class NavigationEngine:
             self.eskf.update_virtual(innovation, H, R)
             
         self.last_state = self._build_state()
+        
+        # Map Matching Observation
+        match = self.map_matcher.update(self.last_state)
+        if match and match.confidence > 0.3:
+            self.last_state.map_matched_lat = match.projected_lat
+            self.last_state.map_matched_lon = match.projected_lon
+            self.last_state.matched_road_id = match.segment.road_id
+            self.last_state.map_match_confidence = match.confidence
+            
+            # Constrain position in ESKF if high confidence
+            if match.confidence > 0.8:
+                # Convert matched lat/lon to ENU
+                from navigation_core.ins.coordinates import lla_to_enu
+                pos_enu = lla_to_enu(match.projected_lat, match.projected_lon, self.last_state.altitude, 
+                                     self.ref_lat, self.ref_lon, self.ref_alt)
+                
+                # Apply as virtual measurement with uncertainty inversely proportional to confidence
+                R_map = np.eye(3) * (5.0 / max(0.1, match.confidence))**2
+                innovation = pos_enu - self.eskf.ins.pos
+                H_map = np.zeros((3, 15))
+                H_map[0:3, 0:3] = np.eye(3)
+                self.eskf.update_virtual(innovation, H_map, R_map)
+                
+                # Re-build state after constraint
+                self.last_state = self._build_state()
+                self.last_state.map_matched_lat = match.projected_lat
+                self.last_state.map_matched_lon = match.projected_lon
+                self.last_state.matched_road_id = match.segment.road_id
+                self.last_state.map_match_confidence = match.confidence
         return self._state_to_dict()
 
     def process_gnss(self, lat: float, lon: float, alt: float, speed: float, course: float, h_acc: float, timestamp: float) -> Dict[str, Any]:
@@ -88,7 +124,7 @@ class NavigationEngine:
         health = self.sync.sync_gnss(meas)
         
         # State Machine
-        self.state_machine.process_gnss(meas, timestamp)
+        self.state_machine.process_gnss(meas, timestamp, self.last_state)
         
         if self.state_machine.mode in [NavigationMode.GNSS_GOOD, NavigationMode.GNSS_DEGRADED]:
             # Convert speed/course to VN, VE
@@ -140,5 +176,10 @@ class NavigationEngine:
             "speed": s.speed_m_s,
             "course": np.degrees(np.arctan2(s.velocity_east, s.velocity_north)),
             "mode": s.mode.name,
-            "pos_uncertainty": s.pos_uncertainty
+            "pos_uncertainty": s.pos_uncertainty,
+            "map_status": s.map_status,
+            "map_matched_lat": s.map_matched_lat,
+            "map_matched_lon": s.map_matched_lon,
+            "matched_road_id": s.matched_road_id,
+            "map_match_confidence": s.map_match_confidence
         }
