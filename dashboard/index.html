@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigators Dashboard</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; }
+        #map { height: 100vh; width: 100%; }
+        #controls { position: absolute; top: 10px; right: 10px; z-index: 1000; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        select { padding: 5px; margin-top: 5px; width: 100%; }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <h3>Navigators</h3>
+        <label for="sessionSelect">Select Session:</label>
+        <select id="sessionSelect" onchange="loadSession(this.value)">
+            <option value="">-- Select --</option>
+        </select>
+    </div>
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([0, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+        
+        let currentPolyline = null;
+
+        async function fetchSessions() {
+            try {
+                const res = await fetch('http://localhost:8000/api/v1/sessions');
+                const data = await res.json();
+                const select = document.getElementById('sessionSelect');
+                data.sessions.forEach(sid => {
+                    const option = document.createElement('option');
+                    option.value = sid;
+                    option.textContent = sid;
+                    select.appendChild(option);
+                });
+            } catch (err) {
+                console.error("Failed to load sessions", err);
+            }
+        }
+
+        async function loadSession(sessionId) {
+            if (!sessionId) return;
+            try {
+                const res = await fetch(`http://localhost:8000/api/v1/sessions/${sessionId}`);
+                const data = await res.json();
+                
+                const latlngs = data.trajectory.map(pt => [pt.lat, pt.lon]);
+                
+                if (currentPolyline) map.removeLayer(currentPolyline);
+                currentPolyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
+                
+                if (latlngs.length > 0) map.fitBounds(currentPolyline.getBounds());
+            } catch (err) {
+                console.error("Failed to load trajectory", err);
+            }
+        }
+
+        fetchSessions();
+    </script>
+</body>
+</html>
