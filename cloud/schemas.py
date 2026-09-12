@@ -19,3 +19,20 @@ class TelemetryPoint(BaseModel):
 
 class TelemetryBatchPayload(BaseModel):
     batch: List[TelemetryPoint] = Field(..., max_items=1000)
+
+class ExperimentResults(BaseModel):
+    position_error: float
+    drift_percent: float
+    speed_rmse: float
+    heading_error: float
+
+class ExperimentRecord(BaseModel):
+    id: str
+    timestamp: float
+    device: str
+    session_id: str
+    model_version: str
+    map_version: str
+    configuration: str
+    outage_scenario: str
+    results: ExperimentResults

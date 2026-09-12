@@ -192,10 +192,13 @@ fun DiagnosticRow(name: String, status: String, isSuccess: Boolean) {
     }
 }
 
+import kotlinx.coroutines.launch
+
 @Composable
 fun SettingsScreen(navController: NavController) {
     val context = androidx.compose.ui.platform.LocalContext.current
     var isUpdating by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     
     Column(Modifier.padding(16.dp)) {
         Text("Settings", style = MaterialTheme.typography.titleLarge)
@@ -211,13 +214,17 @@ fun SettingsScreen(navController: NavController) {
                 Spacer(Modifier.height(8.dp))
                 Button(
                     onClick = {
-                        isUpdating = true
-                        // In a full implementation, this would trigger a download manager
-                        // to fetch from /models/latest and update Chaquopy models/ directory.
-                        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                        scope.launch {
+                            isUpdating = true
+                            val manager = com.example.navigators.ai.ModelManager(context)
+                            val success = manager.checkAndUpdateModel()
                             isUpdating = false
-                            android.widget.Toast.makeText(context, "Model updated successfully", android.widget.Toast.LENGTH_SHORT).show()
-                        }, 2000)
+                            if (success) {
+                                android.widget.Toast.makeText(context, "Model updated successfully", android.widget.Toast.LENGTH_SHORT).show()
+                            } else {
+                                android.widget.Toast.makeText(context, "Failed to update model", android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !isUpdating

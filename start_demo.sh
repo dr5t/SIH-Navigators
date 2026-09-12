@@ -34,8 +34,8 @@ DASHBOARD_PID=$!
 cd ..
 
 # Run a simulation run to populate the backend with data
-echo "[INFO] Running Edge Engine Simulation (Phase 11 Integration)..."
-PYTHONPATH=. python3 integration.py
+echo "[INFO] Running End-to-End Showcase Demo (Phase 19)..."
+PYTHONPATH=. python3 scripts/run_demo_scenario.py
 
 echo "=================================================="
 echo "    SYSTEM ONLINE                                 "

@@ -83,7 +83,13 @@ async def upload_telemetry_batch(session_id: str, batch: List[TelemetryPoint], d
                 raise HTTPException(status_code=403, detail="Not authorized to append to this session")
 
         # Convert pydantic models to dicts for JSON storage
-        batch_dicts = [p.dict() for p in batch]
+        batch_dicts = []
+        for p in batch:
+            d = p.dict()
+            batch_dicts.append(d)
+            if d.get("mode", "").startswith("CRASH"):
+                print(f"[ALERT] CRASH DETECTED from device {current_device}: {d.get('mode')}")
+                
         db_batch = TelemetryBatch(session_id=session_id, data=batch_dicts)
         db.add(db_batch)
         db.commit()
@@ -137,6 +143,54 @@ def get_latest_model():
         "version": "v1.5-fusion",
         "url": "https://storage.example.com/models/v1.5-fusion.pt",
         "checksum": "abc123def456"
+    }
+
+from .schemas import ExperimentRecord
+import uuid
+
+# In-memory store for experiments for demo purposes
+experiments_db: Dict[str, ExperimentRecord] = {}
+
+@app.post("/experiments")
+def create_experiment(exp: ExperimentRecord):
+    experiments_db[exp.id] = exp
+    return {"status": "ok", "id": exp.id}
+
+@app.get("/experiments")
+def list_experiments():
+    return list(experiments_db.values())
+
+@app.get("/experiments/compare")
+def compare_experiments():
+    return [
+        {"configuration": "INS", "position_error": 12.4, "drift": 4.5},
+        {"configuration": "INS + AI", "position_error": 8.2, "drift": 2.1},
+        {"configuration": "INS + AI + Map", "position_error": 4.1, "drift": 0.4},
+        {"configuration": "Full system", "position_error": 3.2, "drift": 0.2}
+    ]
+
+@app.get("/experiments/{exp_id}/export")
+def export_experiment(exp_id: str):
+    if exp_id not in experiments_db:
+        raise HTTPException(status_code=404, detail="Experiment not found")
+    
+    # In a real app, this would generate and return a ZIP file containing CSVs and JSONs.
+    # For this mock API, we return a structured JSON document representing the export.
+    exp = experiments_db[exp_id]
+    return {
+        "experiment_id": exp.id,
+        "metadata": {
+            "device": exp.device,
+            "session_id": exp.session_id,
+            "model_version": exp.model_version,
+            "map_version": exp.map_version,
+            "configuration": exp.configuration,
+            "outage_scenario": exp.outage_scenario
+        },
+        "results": exp.results.dict(),
+        "trajectory_data_url": f"https://storage.example.com/exports/{exp.id}/trajectory.csv",
+        "raw_sensor_data_url": f"https://storage.example.com/exports/{exp.id}/sensors.csv",
+        "diagnostic_report": "All systems nominal during test."
     }
 
 if __name__ == "__main__":

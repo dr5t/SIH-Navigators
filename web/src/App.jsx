@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-do
 import { Activity, Map, Radio, List, Settings, HelpCircle, FileText, LayoutDashboard } from 'lucide-react';
 import './styles.css';
 
+import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import Navigation from './pages/Navigation';
 import Diagnostics from './pages/Diagnostics';
@@ -9,6 +10,9 @@ import SessionsList from './pages/SessionsList';
 import SessionReport from './pages/SessionReport';
 import Benchmark from './pages/Benchmark';
 import Demo from './pages/Demo';
+import SystemHealth from './pages/SystemHealth';
+import ExperimentManager from './pages/ExperimentManager';
+import DeviceCompatibility from './pages/DeviceCompatibility';
 
 const History = () => <div className="card"><h2>History</h2><p>Diagnostic history.</p></div>;
 const SettingsPage = () => <div className="card"><h2>Settings</h2><p>App configuration.</p></div>;
@@ -16,7 +20,8 @@ const FAQ = () => <div className="card"><h2>FAQ</h2><p>Help and questions.</p></
 const Privacy = () => <div className="card"><h2>Privacy Policy</h2><p>Legal terms.</p></div>;
 const Terms = () => <div className="card"><h2>Terms & Conditions</h2><p>Legal terms.</p></div>;
 const Cookies = () => <div className="card"><h2>Cookie Policy</h2><p>Legal terms.</p></div>;
-const NotFound = () => <div className="card"><h2>404</h2><p>Page not found.</p><NavLink to="/" className="btn btn-primary">Go to Dashboard</NavLink></div>;
+const DocsHub = () => <div className="card"><h2>Documentation Hub</h2><p>Read the user guide and API docs.</p></div>;
+const NotFound = () => <div className="card"><h2>404</h2><p>Page not found.</p><NavLink to="/" className="btn btn-primary">Go to Landing</NavLink></div>;
 
 const AppShell = ({ children }) => {
   return (
@@ -27,11 +32,26 @@ const AppShell = ({ children }) => {
         </div>
         
         <div style={{ padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-          <NavLink to="/" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
+          <NavLink to="/" end className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
+            <Activity size={18} style={{marginRight: '8px'}}/> Welcome
+          </NavLink>
+          <NavLink to="/dashboard" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
             <LayoutDashboard size={18} style={{marginRight: '8px'}}/> Dashboard
           </NavLink>
           <NavLink to="/navigation" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
             <Map size={18} style={{marginRight: '8px'}}/> Navigation
+          </NavLink>
+          <NavLink to="/demo" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
+            <FileText size={18} style={{marginRight: '8px'}}/> One-Click Demo
+          </NavLink>
+          <NavLink to="/experiments" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
+            <List size={18} style={{marginRight: '8px'}}/> Experiments
+          </NavLink>
+          <NavLink to="/health" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
+            <Radio size={18} style={{marginRight: '8px'}}/> System Health
+          </NavLink>
+          <NavLink to="/compatibility" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
+            <Radio size={18} style={{marginRight: '8px'}}/> Device Matrix
           </NavLink>
           <NavLink to="/diagnostics" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
             <Radio size={18} style={{marginRight: '8px'}}/> Diagnostics
@@ -39,17 +59,11 @@ const AppShell = ({ children }) => {
           <NavLink to="/sessions" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
             <List size={18} style={{marginRight: '8px'}}/> Sessions
           </NavLink>
-          <NavLink to="/benchmark" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <Activity size={18} style={{marginRight: '8px'}}/> Benchmarks
-          </NavLink>
-          <NavLink to="/demo" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <FileText size={18} style={{marginRight: '8px'}}/> Demo View
-          </NavLink>
           <NavLink to="/settings" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
             <Settings size={18} style={{marginRight: '8px'}}/> Settings
           </NavLink>
-          <NavLink to="/faq" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <HelpCircle size={18} style={{marginRight: '8px'}}/> FAQ
+          <NavLink to="/docs" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
+            <HelpCircle size={18} style={{marginRight: '8px'}}/> Documentation
           </NavLink>
         </div>
         
@@ -71,15 +85,20 @@ export default function App() {
     <Router>
       <AppShell>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<Landing />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/navigation" element={<Navigation />} />
+          <Route path="/health" element={<SystemHealth />} />
+          <Route path="/compatibility" element={<DeviceCompatibility />} />
           <Route path="/diagnostics" element={<Diagnostics />} />
+          <Route path="/experiments" element={<ExperimentManager />} />
           <Route path="/sessions" element={<SessionsList />} />
           <Route path="/sessions/:id" element={<SessionReport />} />
           <Route path="/benchmark" element={<Benchmark />} />
           <Route path="/demo" element={<Demo />} />
           <Route path="/history" element={<History />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/docs" element={<DocsHub />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
