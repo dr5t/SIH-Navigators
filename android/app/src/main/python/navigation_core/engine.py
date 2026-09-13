@@ -16,7 +16,7 @@ class NavigationEngine:
     The top-level orchestrator for the Navigators Core Navigation Engine.
     This class is instantiated by Chaquopy in Android (PythonBridge.kt).
     """
-    def __init__(self, ref_lat: float, ref_lon: float, ref_alt: float):
+    def __init__(self, ref_lat: float, ref_lon: float, ref_alt: float, ai_model_version: str = "v1.4"):
         self.ref_lat = ref_lat
         self.ref_lon = ref_lon
         self.ref_alt = ref_alt
@@ -29,7 +29,7 @@ class NavigationEngine:
         self.attitude = AttitudeEstimator(beta=0.1)
         
         # Phases 5: AI Speed
-        self.speed_estimator = AISpeedEstimator()
+        self.speed_estimator = AISpeedEstimator(version=ai_model_version)
         
         # Phase 7: Constraints
         self.nhc = NonHolonomicConstraints()

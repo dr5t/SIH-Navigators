@@ -5,15 +5,23 @@ import numpy as np
 from typing import Optional, Tuple
 
 class AISpeedEstimator:
-    def __init__(self, model_filename: str = "speed_model.pt", metadata_filename: str = "speed_metadata.json"):
+    def __init__(self, version: str = "v1.4"):
         # Resolve path relative to this script so it works on Android (Chaquopy)
         base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__))) # go up from navigation_core/ai to python root
-        self.model_path = os.path.join(base_dir, model_filename)
-        self.metadata_path = os.path.join(base_dir, metadata_filename)
+        self.model_path = os.path.join(base_dir, f"speed_model_{version}.pt")
+        self.metadata_path = os.path.join(base_dir, f"speed_metadata_{version}.json")
+        
+        # Fallbacks for backwards compatibility
+        if not os.path.exists(self.model_path):
+            self.model_path = os.path.join(base_dir, "speed_model.pt")
+            self.metadata_path = os.path.join(base_dir, "speed_metadata.json")
         
         self.is_available = False
         self.model = None
-        self.model_version = "unknown"
+        self.model_version = version
+        self.dataset = "unknown"
+        self.preprocessing = "unknown"
+        self.last_inference_latency_ms = 0.0
         
         # Parity Config Defaults
         self.seq_len = 200
@@ -36,7 +44,9 @@ class AISpeedEstimator:
                     if "accel_std" in norm: self.accel_std = np.array(norm["accel_std"])
                     if "gyro_mean" in norm: self.gyro_mean = np.array(norm["gyro_mean"])
                     if "gyro_std" in norm: self.gyro_std = np.array(norm["gyro_std"])
-                    self.model_version = meta.get("version", "v1.0")
+                    self.model_version = meta.get("version", self.model_version)
+                    self.dataset = meta.get("dataset", "unknown")
+                    self.preprocessing = meta.get("preprocessing", "unknown")
             except Exception as e:
                 print(f"Failed to load AI metadata: {e}. Using defaults.")
 
@@ -92,7 +102,7 @@ class AISpeedEstimator:
             start_time = time.time()
             with torch.no_grad():
                 pred = self.model(tensor_X).numpy()[0, 0]
-            latency_ms = (time.time() - start_time) * 1000.0
+            self.last_inference_latency_ms = (time.time() - start_time) * 1000.0
             
             # 5. Quality/Confidence calculation (placeholder heuristic based on latency and sensible bounds)
             # True confidence would require a probabilistic model (e.g. MC Dropout or NLL output).
@@ -101,14 +111,16 @@ class AISpeedEstimator:
                 confidence = 0.1
                 pred = max(0.0, pred)
                 
-            # Log latency in debug mode (print statement is safe for python environment)
-            # print(f"[AI Speed] Latency: {latency_ms:.1f}ms, Pred: {pred:.2f}m/s")
-            
             return float(pred), confidence
             
         except Exception as e:
             print(f"AI Speed Inference error: {e}")
             return None, 0.0
+
+    def get_model_size_mb(self) -> float:
+        if os.path.exists(self.model_path):
+            return os.path.getsize(self.model_path) / (1024 * 1024)
+        return 0.0
 
     def fallback_speed(self, accel_window: np.ndarray, dt: float, prev_speed: float) -> float:
         """

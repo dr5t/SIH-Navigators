@@ -26,6 +26,13 @@ class ExperimentResults(BaseModel):
     drift_percent: float
     speed_rmse: float
     heading_error: float
+    speed_mae: Optional[float] = None
+    max_error: Optional[float] = None
+    inference_latency_ms: Optional[float] = None
+    model_size_mb: Optional[float] = None
+    memory_usage_mb: Optional[float] = None
+    dataset: Optional[str] = None
+    preprocessing_version: Optional[str] = None
 
 class ExperimentRecord(BaseModel):
     id: str

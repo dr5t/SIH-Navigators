@@ -429,9 +429,10 @@ def list_experiments(db: Session = Depends(get_db)):
 @app.post("/sessions/{session_id}/replay")
 def run_replay(session_id: str, payload: dict, db: Session = Depends(get_db)):
     config = payload.get("configuration", "INS")
+    model_version = payload.get("model_version", "v1.4")
     from replay import run_experiment
     try:
-        return run_experiment(session_id, config, db)
+        return run_experiment(session_id, config, model_version, db)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -447,8 +448,8 @@ def compare_experiments(exp_a: str, exp_b: str, db: Session = Depends(get_db)):
     rb = b.results if not isinstance(b.results, str) else json.loads(b.results)
     
     return {
-        "experiment_a": {"id": a.id, "configuration": a.configuration, "results": ra},
-        "experiment_b": {"id": b.id, "configuration": b.configuration, "results": rb}
+        "experiment_a": {"id": a.id, "session_id": a.session_id, "model_version": a.model_version, "configuration": a.configuration, "results": ra},
+        "experiment_b": {"id": b.id, "session_id": b.session_id, "model_version": b.model_version, "configuration": b.configuration, "results": rb}
     }
 
 @app.get("/experiments/{exp_id}/export")

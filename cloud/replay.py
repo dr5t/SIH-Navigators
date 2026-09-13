@@ -22,7 +22,7 @@ def haversine_dist(lat1, lon1, lat2, lon2):
     c = 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
     return R * c
 
-def run_experiment(session_id: str, configuration: str, db: Session):
+def run_experiment(session_id: str, configuration: str, model_version: str, db: Session):
     # 1. Fetch Session Data
     batches = db.query(TelemetryBatch).filter(TelemetryBatch.session_id == session_id).order_by(TelemetryBatch.id).all()
     if not batches:
@@ -52,7 +52,7 @@ def run_experiment(session_id: str, configuration: str, db: Session):
     ref_lon = points[0]["longitude"]
     ref_alt = points[0]["altitude"]
     
-    engine = NavigationEngine(ref_lat, ref_lon, ref_alt)
+    engine = NavigationEngine(ref_lat, ref_lon, ref_alt, ai_model_version=model_version)
     
     # Setup Toggles
     enable_nhc = "Constraints" in configuration or "Full" in configuration
@@ -70,6 +70,7 @@ def run_experiment(session_id: str, configuration: str, db: Session):
     est_lons = []
     est_speeds = []
     gt_speeds = []
+    latencies = []
     
     trajectory_out = []
     
@@ -126,6 +127,9 @@ def run_experiment(session_id: str, configuration: str, db: Session):
             est_lons.append(state["lon"])
             est_speeds.append(state["speed"])
             
+        if engine.speed_estimator.last_inference_latency_ms > 0:
+            latencies.append(engine.speed_estimator.last_inference_latency_ms)
+            
         trajectory_out.append({
             "timestamp": p["timestamp"],
             "lat": state["lat"],
@@ -142,14 +146,28 @@ def run_experiment(session_id: str, configuration: str, db: Session):
     metrics = calculate_drift_metrics(np.array(est_lats), np.array(est_lons), np.array(gt_lats), np.array(gt_lons))
     speed_errors = np.array(est_speeds) - np.array(gt_speeds)
     speed_rmse = calculate_rmse(speed_errors)
+    speed_mae = float(np.mean(np.abs(speed_errors))) if len(speed_errors) > 0 else 0.0
+    max_error = float(np.max(np.abs(speed_errors))) if len(speed_errors) > 0 else 0.0
     
     pos_error_final = haversine_dist(est_lats[-1], est_lons[-1], gt_lats[-1], gt_lons[-1]) if len(est_lats) > 0 else 0
+    
+    # Model info
+    avg_latency = float(np.mean(latencies)) if latencies else 0.0
+    model_size = engine.speed_estimator.get_model_size_mb()
+    dataset = engine.speed_estimator.dataset
+    preprocessing = engine.speed_estimator.preprocessing
     
     results = ExperimentResults(
         position_error=round(pos_error_final, 2),
         drift_percent=round(metrics["drift_percent"], 2) if "drift_percent" in metrics else 0.0,
         speed_rmse=round(speed_rmse, 2),
-        heading_error=0.0 # simplified
+        heading_error=0.0, # simplified
+        speed_mae=round(speed_mae, 2),
+        max_error=round(max_error, 2),
+        inference_latency_ms=round(avg_latency, 2),
+        model_size_mb=round(model_size, 2),
+        dataset=dataset,
+        preprocessing_version=preprocessing
     )
     
     exp_id = str(uuid.uuid4())
@@ -158,7 +176,7 @@ def run_experiment(session_id: str, configuration: str, db: Session):
         timestamp=datetime.utcnow().timestamp(),
         device="sim_engine",
         session_id=session_id,
-        model_version="v2.0",
+        model_version=model_version,
         map_version="v1.0",
         configuration=configuration,
         outage_scenario="50% End of trip",

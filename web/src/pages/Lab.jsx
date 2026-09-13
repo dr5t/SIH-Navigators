@@ -7,6 +7,7 @@ export default function Lab() {
   const [sessions, setSessions] = useState([]);
   const [selectedSession, setSelectedSession] = useState("");
   const [config, setConfig] = useState("INS");
+  const [modelVersion, setModelVersion] = useState("v1.4");
   const [isRunning, setIsRunning] = useState(false);
   
   const [experiments, setExperiments] = useState([]);
@@ -50,7 +51,7 @@ export default function Lab() {
       const res = await fetch(`http://localhost:8000/sessions/${selectedSession}/replay`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ configuration: config })
+        body: JSON.stringify({ configuration: config, model_version: modelVersion })
       });
       const data = await res.json();
       setCurrentResult(data);
@@ -111,9 +112,19 @@ export default function Lab() {
             <select 
               value={config} 
               onChange={e => setConfig(e.target.value)}
-              style={{ width: '100%', padding: 'var(--space-2)', marginBottom: 'var(--space-6)', background: 'var(--surface-sunken)', border: '1px solid var(--border-light)', color: 'white', borderRadius: '4px' }}
+              style={{ width: '100%', padding: 'var(--space-2)', marginBottom: 'var(--space-4)', background: 'var(--surface-sunken)', border: '1px solid var(--border-light)', color: 'white', borderRadius: '4px' }}
             >
               {configs.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+
+            <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: '500' }}>Model Version</label>
+            <select 
+              value={modelVersion} 
+              onChange={e => setModelVersion(e.target.value)}
+              style={{ width: '100%', padding: 'var(--space-2)', marginBottom: 'var(--space-6)', background: 'var(--surface-sunken)', border: '1px solid var(--border-light)', color: 'white', borderRadius: '4px' }}
+            >
+              <option value="v1.4">v1.4 (baseline)</option>
+              <option value="v1.5">v1.5 (latest)</option>
             </select>
 
             <button 
@@ -140,6 +151,14 @@ export default function Lab() {
                   <strong>{currentResult.results.speed_rmse} m/s</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Speed MAE</span>
+                  <strong>{currentResult.results.speed_mae} m/s</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Max Error</span>
+                  <strong>{currentResult.results.max_error} m/s</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Heading Error</span>
                   <strong>{currentResult.results.heading_error}°</strong>
                 </div>
@@ -148,6 +167,15 @@ export default function Lab() {
                   <strong style={{ color: currentResult.results.drift_percent < 2.0 ? 'var(--success)' : 'var(--warning)' }}>
                     {currentResult.results.drift_percent}%
                   </strong>
+                </div>
+                <hr style={{ border: 'none', borderTop: '1px solid var(--border-light)', margin: 'var(--space-2) 0' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Avg Latency</span>
+                  <strong>{currentResult.results.inference_latency_ms} ms</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Model Size</span>
+                  <strong>{currentResult.results.model_size_mb} MB</strong>
                 </div>
               </div>
             </div>
@@ -268,12 +296,23 @@ export default function Lab() {
 
         {compareData && (
           <div className="card">
+            {(compareData.experiment_a.session_id !== compareData.experiment_b.session_id || compareData.experiment_a.configuration !== compareData.experiment_b.configuration) && (
+              <div style={{ padding: 'var(--space-3)', background: 'rgba(255, 82, 82, 0.1)', color: 'var(--error)', borderLeft: '4px solid var(--error)', marginBottom: 'var(--space-4)' }}>
+                <strong>Warning:</strong> These models were evaluated under different conditions (Session or Configuration) and are not directly comparable.
+              </div>
+            )}
             <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border-light)' }}>
                   <th style={{ padding: 'var(--space-2) 0' }}>Metric</th>
-                  <th style={{ padding: 'var(--space-2) 0' }}>{compareData.experiment_a.configuration}</th>
-                  <th style={{ padding: 'var(--space-2) 0' }}>{compareData.experiment_b.configuration}</th>
+                  <th style={{ padding: 'var(--space-2) 0' }}>
+                    {compareData.experiment_a.model_version || 'N/A'}<br/>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{compareData.experiment_a.configuration}</span>
+                  </th>
+                  <th style={{ padding: 'var(--space-2) 0' }}>
+                    {compareData.experiment_b.model_version || 'N/A'}<br/>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{compareData.experiment_b.configuration}</span>
+                  </th>
                   <th style={{ padding: 'var(--space-2) 0' }}>Improvement</th>
                 </tr>
               </thead>
@@ -294,7 +333,7 @@ export default function Lab() {
                     {((compareData.experiment_a.results.drift_percent - compareData.experiment_b.results.drift_percent)).toFixed(1)}%
                   </td>
                 </tr>
-                <tr>
+                <tr style={{ borderBottom: '1px solid var(--border-light)' }}>
                   <td style={{ padding: 'var(--space-3) 0', color: 'var(--text-muted)' }}>Speed RMSE</td>
                   <td style={{ padding: 'var(--space-3) 0' }}>{compareData.experiment_a.results.speed_rmse} m/s</td>
                   <td style={{ padding: 'var(--space-3) 0' }}>{compareData.experiment_b.results.speed_rmse} m/s</td>
@@ -302,8 +341,49 @@ export default function Lab() {
                     {((compareData.experiment_a.results.speed_rmse - compareData.experiment_b.results.speed_rmse)).toFixed(1)} m/s
                   </td>
                 </tr>
+                <tr style={{ borderBottom: '1px solid var(--border-light)' }}>
+                  <td style={{ padding: 'var(--space-3) 0', color: 'var(--text-muted)' }}>Speed MAE</td>
+                  <td style={{ padding: 'var(--space-3) 0' }}>{compareData.experiment_a.results.speed_mae} m/s</td>
+                  <td style={{ padding: 'var(--space-3) 0' }}>{compareData.experiment_b.results.speed_mae} m/s</td>
+                  <td style={{ padding: 'var(--space-3) 0', color: compareData.experiment_a.results.speed_mae > compareData.experiment_b.results.speed_mae ? 'var(--success)' : 'var(--error)' }}>
+                    {((compareData.experiment_a.results.speed_mae - compareData.experiment_b.results.speed_mae)).toFixed(1)} m/s
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid var(--border-light)' }}>
+                  <td style={{ padding: 'var(--space-3) 0', color: 'var(--text-muted)' }}>Max Error</td>
+                  <td style={{ padding: 'var(--space-3) 0' }}>{compareData.experiment_a.results.max_error} m/s</td>
+                  <td style={{ padding: 'var(--space-3) 0' }}>{compareData.experiment_b.results.max_error} m/s</td>
+                  <td style={{ padding: 'var(--space-3) 0', color: compareData.experiment_a.results.max_error > compareData.experiment_b.results.max_error ? 'var(--success)' : 'var(--error)' }}>
+                    {((compareData.experiment_a.results.max_error - compareData.experiment_b.results.max_error)).toFixed(1)} m/s
+                  </td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid var(--border-light)' }}>
+                  <td style={{ padding: 'var(--space-3) 0', color: 'var(--text-muted)' }}>Inference Latency</td>
+                  <td style={{ padding: 'var(--space-3) 0' }}>{compareData.experiment_a.results.inference_latency_ms} ms</td>
+                  <td style={{ padding: 'var(--space-3) 0' }}>{compareData.experiment_b.results.inference_latency_ms} ms</td>
+                  <td style={{ padding: 'var(--space-3) 0', color: compareData.experiment_a.results.inference_latency_ms > compareData.experiment_b.results.inference_latency_ms ? 'var(--success)' : 'var(--error)' }}>
+                    {((compareData.experiment_a.results.inference_latency_ms - compareData.experiment_b.results.inference_latency_ms)).toFixed(1)} ms
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: 'var(--space-3) 0', color: 'var(--text-muted)' }}>Model Size</td>
+                  <td style={{ padding: 'var(--space-3) 0' }}>{compareData.experiment_a.results.model_size_mb} MB</td>
+                  <td style={{ padding: 'var(--space-3) 0' }}>{compareData.experiment_b.results.model_size_mb} MB</td>
+                  <td style={{ padding: 'var(--space-3) 0', color: compareData.experiment_a.results.model_size_mb > compareData.experiment_b.results.model_size_mb ? 'var(--success)' : 'var(--error)' }}>
+                    {((compareData.experiment_a.results.model_size_mb - compareData.experiment_b.results.model_size_mb)).toFixed(1)} MB
+                  </td>
+                </tr>
               </tbody>
             </table>
+            
+            <div style={{ marginTop: 'var(--space-4)', fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', gap: 'var(--space-6)' }}>
+              <div><strong>A Dataset:</strong> {compareData.experiment_a.results.dataset}</div>
+              <div><strong>B Dataset:</strong> {compareData.experiment_b.results.dataset}</div>
+            </div>
+            <div style={{ marginTop: 'var(--space-2)', fontSize: '0.85rem', color: 'var(--text-muted)', display: 'flex', gap: 'var(--space-6)' }}>
+              <div><strong>A Preprocessing:</strong> {compareData.experiment_a.results.preprocessing_version}</div>
+              <div><strong>B Preprocessing:</strong> {compareData.experiment_b.results.preprocessing_version}</div>
+            </div>
           </div>
         )}
       </div>
