@@ -16,17 +16,17 @@ class SensorRecorder(context: Context) : SensorEventListener {
     
     private var lastAccel: FloatArray? = null
     
-    fun start() {
+    fun start(handler: android.os.Handler? = null) {
         // Try SENSOR_DELAY_FASTEST first, fall back to SENSOR_DELAY_GAME if
         // the HIGH_SAMPLING_RATE_SENSORS permission is not granted on Android 12+
         try {
             if (accel != null) {
-                sensorManager.registerListener(this, accel, SensorManager.SENSOR_DELAY_FASTEST)
+                sensorManager.registerListener(this, accel, SensorManager.SENSOR_DELAY_GAME, handler)
             } else {
                 Log.w("SensorRecorder", "Accelerometer not available on this device")
             }
             if (gyro != null) {
-                sensorManager.registerListener(this, gyro, SensorManager.SENSOR_DELAY_FASTEST)
+                sensorManager.registerListener(this, gyro, SensorManager.SENSOR_DELAY_GAME, handler)
             } else {
                 Log.w("SensorRecorder", "Gyroscope not available on this device")
             }
@@ -35,8 +35,8 @@ class SensorRecorder(context: Context) : SensorEventListener {
             Log.w("SensorRecorder", "SENSOR_DELAY_FASTEST denied, falling back to SENSOR_DELAY_GAME: ${e.message}")
             sensorManager.unregisterListener(this)
             try {
-                accel?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME) }
-                gyro?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME) }
+                accel?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME, handler) }
+                gyro?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME, handler) }
             } catch (e2: Exception) {
                 Log.e("SensorRecorder", "Failed to register sensors even with SENSOR_DELAY_GAME: ${e2.message}")
             }

@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.spatial.transform import Rotation
 from navigation_core.ins.quaternion import Quaternion
 from typing import Optional
 
@@ -56,6 +55,8 @@ def compute_static_alignment(accel_window: np.ndarray, yaw_deg: float = 0.0) -> 
     roll = np.arctan2(f_b_hat[1], f_b_hat[2])
     yaw = np.radians(yaw_deg)
     
-    rot = Rotation.from_euler('zyx', [yaw, pitch, roll])
-    q = rot.as_quat()
-    return Quaternion([q[3], q[0], q[1], q[2]])
+    # Extrinsic z-y-x composition, matching scipy's lowercase 'zyx'.
+    qz = np.array([np.cos(yaw/2), 0, 0, np.sin(yaw/2)])
+    qy = np.array([np.cos(pitch/2), 0, np.sin(pitch/2), 0])
+    qx = np.array([np.cos(roll/2), np.sin(roll/2), 0, 0])
+    return Quaternion(Quaternion._multiply(qx, Quaternion._multiply(qy, qz)))

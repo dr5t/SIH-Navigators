@@ -1,84 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Activity, MapPin, Wifi, Zap } from 'lucide-react';
-
+import { Link } from 'react-router-dom';
+import { ArrowUpRight, Navigation2 } from 'lucide-react';
+import { useTelemetry, number, modeLabel } from '../telemetry';
 export default function Dashboard() {
-  const [status, setStatus] = useState({
-    internet: 'Online',
-    gnss: 'GNSS + INS',
-    speed: 0,
-    heading: 0,
-    syncQueue: 0
-  });
-
-  useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8000/telemetry/live');
-    
-    ws.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      if (msg.type === 'telemetry_batch' && msg.data && msg.data.length > 0) {
-        // Get latest point in batch
-        const latest = msg.data[msg.data.length - 1];
-        setStatus(prev => ({
-          ...prev,
-          speed: Math.round(latest.speed * 3.6), // Convert m/s to km/h
-          heading: Math.round(latest.heading || 0),
-          gnss: latest.mode || prev.gnss
-        }));
-      }
-    };
-
-    ws.onclose = () => {
-      setStatus(prev => ({ ...prev, internet: 'Offline (Cloud disconnected)' }));
-    };
-
-    return () => ws.close();
-  }, []);
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
-      <header>
-        <h2>Dashboard</h2>
-        <p style={{ color: 'var(--text-muted)' }}>Real-time navigation and sensor overview.</p>
-      </header>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--space-4)' }}>
-        
-        <div className="card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-            <Activity color="var(--status-dr)" />
-            <h3 style={{ margin: 0 }}>Navigation Status</h3>
-          </div>
-          <div className="status-badge status-success">{status.gnss}</div>
-        </div>
-
-        <div className="card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-            <MapPin color="var(--brand-primary)" />
-            <h3 style={{ margin: 0 }}>Current Telemetry</h3>
-          </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{status.speed} km/h</div>
-          <div style={{ color: 'var(--text-secondary)' }}>Heading: {status.heading}° (W)</div>
-        </div>
-
-        <div className="card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-            <Zap color="var(--status-warning)" />
-            <h3 style={{ margin: 0 }}>Sensor Health</h3>
-          </div>
-          <div className="status-badge status-warning">Diagnostics Required</div>
-          <p style={{ marginTop: '8px', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Run full diagnostic scan before next trip.</p>
-        </div>
-
-        <div className="card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-            <Wifi color="var(--status-success)" />
-            <h3 style={{ margin: 0 }}>Connectivity</h3>
-          </div>
-          <div className="status-badge status-success">{status.internet}</div>
-          <p style={{ marginTop: '8px', fontSize: '0.875rem', color: 'var(--text-muted)' }}>{status.syncQueue} pending records</p>
-        </div>
-
-      </div>
-    </div>
-  );
+  const { point, connected, stale, received } = useTelemetry();
+  return <div className="navigation-page">
+    <header className="page-heading"><div><span className="eyebrow">NAVIGATION / LIVE INSTRUMENTS</span><h1>{stale ? 'Ready when you are.' : modeLabel(point?.mode)}</h1><p>{stale ? 'Start navigation on your connected Android device.' : 'Live navigation state from your device.'}</p></div><span className={`status-badge ${connected && !stale ? 'status-success' : ''}`}>{!connected ? 'Disconnected' : stale ? 'Awaiting telemetry' : 'Receiving'}</span></header>
+    <section className="instrument-panel" aria-label="Navigation instruments">
+      <div className="speed-instrument"><span className="eyebrow">GROUND SPEED</span><div className="speed-value">{number(point?.speed == null ? null : point.speed * 3.6, 0)}<span>km/h</span></div><span className="instrument-caption">{stale && point ? 'LAST RECEIVED POSITION' : 'NAVIGATION TELEMETRY'}</span></div>
+      <div className="course-instrument"><Navigation2 size={24} strokeWidth={1.3}/><strong>{number(point?.course ?? point?.heading, 0)}°</strong><span className="eyebrow">TRUE COURSE</span></div>
+      <div className="instrument-details"><dl><div><dt>Latitude</dt><dd>{number(point?.lat, 6)}</dd></div><div><dt>Longitude</dt><dd>{number(point?.lon, 6)}</dd></div><div><dt>Position uncertainty</dt><dd>{number(point?.pos_uncertainty ?? point?.h_acc)} m</dd></div><div><dt>Navigation state</dt><dd>{stale ? 'Unavailable' : modeLabel(point?.mode)}</dd></div></dl></div>
+    </section>
+    <div className="navigation-secondary"><section><span className="eyebrow">SYSTEM STATE</span><dl className="instrument-list"><div><dt>GNSS / inertial fusion</dt><dd>{stale ? 'UNAVAILABLE' : modeLabel(point?.mode)}</dd></div><div><dt>AI speed inference</dt><dd>{!stale && point?.ai_status === 'ACTIVE' ? 'ACTIVE' : 'UNAVAILABLE'}</dd></div><div><dt>Confidence</dt><dd>{!stale ? point?.confidence || 'UNAVAILABLE' : 'UNAVAILABLE'}</dd></div><div><dt>Last received</dt><dd>{received ? new Date(received).toLocaleTimeString() : 'No telemetry yet'}</dd></div></dl></section>
+    <section className="map-entry"><span className="eyebrow">POSITION & TRAJECTORY</span><h2>Keep the route in view.</h2><p>Follow the device position, heading and recorded trajectory on the map.</p><Link className="btn btn-primary" to="/navigation">Open map <ArrowUpRight size={18}/></Link><Link className="text-link" to="/sessions">Browse trip log</Link></section></div>
+  </div>;
 }

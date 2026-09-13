@@ -1,0 +1,444 @@
+--------- beginning of crash
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: FATAL EXCEPTION: main
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: Process: com.example.navigators, PID: 13437
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: java.lang.SecurityException: To use the sampling rate of 0 microseconds, app needs to declare the normal permission HIGH_SAMPLING_RATE_SENSORS.
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at android.hardware.SystemSensorManager$BaseEventQueue.enableSensor(SystemSensorManager.java:1011)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at android.hardware.SystemSensorManager$BaseEventQueue.addSensor(SystemSensorManager.java:931)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at android.hardware.SystemSensorManager.registerListenerImpl(SystemSensorManager.java:345)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at android.hardware.SensorManager.registerListener(SensorManager.java:858)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at android.hardware.SensorManager.registerListener(SensorManager.java:765)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at com.example.navigators.SensorRecorder.start(SensorRecorder.kt:19)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at com.example.navigators.ui.main.NavigationViewModel.startNavigation(NavigationViewModel.kt:66)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at com.example.navigators.ui.main.ScreensKt$NavigationScreen$2$1.invokeSuspend(Screens.kt:206)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at androidx.compose.ui.platform.AndroidUiDispatcher.performTrampolineDispatch(AndroidUiDispatcher.android.kt:79)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at androidx.compose.ui.platform.AndroidUiDispatcher.access$performTrampolineDispatch(AndroidUiDispatcher.android.kt:41)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at androidx.compose.ui.platform.AndroidUiDispatcher$dispatchCallback$1.doFrame(AndroidUiDispatcher.android.kt:68)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at android.view.Choreographer$CallbackRecord.run(Choreographer.java:2086)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at android.view.Choreographer$CallbackRecord.run(Choreographer.java:2097)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at android.view.Choreographer.doCallbacks(Choreographer.java:1572)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at android.view.Choreographer.doFrame(Choreographer.java:1429)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:2051)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at android.os.Handler.handleCallback(Handler.java:1029)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:274)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:369)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:10090)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:616)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1137)
+09-13 10:29:32.977 13437 13437 E AndroidRuntime: 	Suppressed: kotlinx.coroutines.internal.DiagnosticCoroutineContextException: [androidx.compose.ui.platform.MotionDurationScaleImpl@92d4dfd, androidx.compose.runtime.BroadcastFrameClock@4bb7af2, androidx.compose.runtime.LaunchedEffectImpl@6629a18, StandaloneCoroutine{Cancelling}@c754543, AndroidUiDispatcher@ddb17c0]
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: FATAL EXCEPTION: main
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: Process: com.example.navigators, PID: 14006
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: java.lang.SecurityException: To use the sampling rate of 0 microseconds, app needs to declare the normal permission HIGH_SAMPLING_RATE_SENSORS.
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at android.hardware.SystemSensorManager$BaseEventQueue.enableSensor(SystemSensorManager.java:1011)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at android.hardware.SystemSensorManager$BaseEventQueue.addSensor(SystemSensorManager.java:931)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at android.hardware.SystemSensorManager.registerListenerImpl(SystemSensorManager.java:345)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at android.hardware.SensorManager.registerListener(SensorManager.java:858)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at android.hardware.SensorManager.registerListener(SensorManager.java:765)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at com.example.navigators.SensorRecorder.start(SensorRecorder.kt:19)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at com.example.navigators.ui.main.NavigationViewModel.startNavigation(NavigationViewModel.kt:66)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at com.example.navigators.ui.main.ScreensKt$NavigationScreen$1$1.invokeSuspend(Screens.kt:200)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at androidx.compose.ui.platform.AndroidUiDispatcher.performTrampolineDispatch(AndroidUiDispatcher.android.kt:79)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at androidx.compose.ui.platform.AndroidUiDispatcher.access$performTrampolineDispatch(AndroidUiDispatcher.android.kt:41)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at androidx.compose.ui.platform.AndroidUiDispatcher$dispatchCallback$1.run(AndroidUiDispatcher.android.kt:57)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at android.os.Handler.handleCallback(Handler.java:1029)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:274)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:369)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:10090)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:616)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1137)
+09-13 10:29:37.969 14006 14006 E AndroidRuntime: 	Suppressed: kotlinx.coroutines.internal.DiagnosticCoroutineContextException: [androidx.compose.ui.platform.MotionDurationScaleImpl@2c1c51a, androidx.compose.runtime.BroadcastFrameClock@2ab084b, androidx.compose.runtime.LaunchedEffectImpl@84573fc, StandaloneCoroutine{Cancelling}@45b9228, AndroidUiDispatcher@4759b41]
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: FATAL EXCEPTION: main
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: Process: com.example.navigators, PID: 14642
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: java.lang.SecurityException: To use the sampling rate of 0 microseconds, app needs to declare the normal permission HIGH_SAMPLING_RATE_SENSORS.
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at android.hardware.SystemSensorManager$BaseEventQueue.enableSensor(SystemSensorManager.java:1011)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at android.hardware.SystemSensorManager$BaseEventQueue.addSensor(SystemSensorManager.java:931)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at android.hardware.SystemSensorManager.registerListenerImpl(SystemSensorManager.java:345)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at android.hardware.SensorManager.registerListener(SensorManager.java:858)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at android.hardware.SensorManager.registerListener(SensorManager.java:765)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at com.example.navigators.SensorRecorder.start(SensorRecorder.kt:19)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at com.example.navigators.ui.main.NavigationViewModel.startNavigation(NavigationViewModel.kt:66)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at com.example.navigators.ui.main.ScreensKt$NavigationScreen$1$1.invokeSuspend(Screens.kt:200)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at androidx.compose.ui.platform.AndroidUiDispatcher.performTrampolineDispatch(AndroidUiDispatcher.android.kt:79)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at androidx.compose.ui.platform.AndroidUiDispatcher.access$performTrampolineDispatch(AndroidUiDispatcher.android.kt:41)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at androidx.compose.ui.platform.AndroidUiDispatcher$dispatchCallback$1.run(AndroidUiDispatcher.android.kt:57)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at android.os.Handler.handleCallback(Handler.java:1029)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:274)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:369)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:10090)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:616)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1137)
+09-13 10:29:53.581 14642 14642 E AndroidRuntime: 	Suppressed: kotlinx.coroutines.internal.DiagnosticCoroutineContextException: [androidx.compose.ui.platform.MotionDurationScaleImpl@1707409, androidx.compose.runtime.BroadcastFrameClock@832560e, androidx.compose.runtime.LaunchedEffectImpl@8a790a6, StandaloneCoroutine{Cancelling}@7b182f, AndroidUiDispatcher@921ce3c]
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: FATAL EXCEPTION: main
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: Process: com.example.navigators, PID: 15022
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: java.lang.RuntimeException: Cannot find implementation for com.example.navigators.data.TelemetryDatabase. TelemetryDatabase_Impl does not exist
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: 	at androidx.room.Room.getGeneratedImplementation(Room.kt:58)
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: 	at androidx.room.RoomDatabase$Builder.build(RoomDatabase.kt:1351)
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: 	at com.example.navigators.data.TelemetryDatabase$Companion.getDatabase(TelemetryDatabase.kt:65)
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: 	at com.example.navigators.ui.main.ScreensKt$SettingsScreen$2$3$1$1$1.invokeSuspend(Screens.kt:469)
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: 	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: 	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: 	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
+09-13 10:30:12.862 15022 15022 E AndroidRuntime: 	Suppressed: kotlinx.coroutines.internal.DiagnosticCoroutineContextException: [androidx.compose.ui.platform.MotionDurationScaleImpl@d47e2c8, androidx.compose.runtime.BroadcastFrameClock@d64af61, androidx.compose.runtime.LaunchedEffectImpl@c92d29, StandaloneCoroutine{Cancelling}@7546a86, AndroidUiDispatcher@10a5f47]
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: FATAL EXCEPTION: main
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: Process: com.example.navigators, PID: 15740
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: java.lang.RuntimeException: Cannot find implementation for com.example.navigators.data.TelemetryDatabase. TelemetryDatabase_Impl does not exist
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: 	at androidx.room.Room.getGeneratedImplementation(Room.kt:58)
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: 	at androidx.room.RoomDatabase$Builder.build(RoomDatabase.kt:1351)
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: 	at com.example.navigators.data.TelemetryDatabase$Companion.getDatabase(TelemetryDatabase.kt:65)
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: 	at com.example.navigators.ui.main.ScreensKt$SettingsScreen$2$3$1$1$1.invokeSuspend(Screens.kt:469)
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: 	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:113)
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: 	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:89)
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: 	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:589)
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:823)
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:720)
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:707)
+09-13 10:31:06.288 15740 15740 E AndroidRuntime: 	Suppressed: kotlinx.coroutines.internal.DiagnosticCoroutineContextException: [androidx.compose.ui.platform.MotionDurationScaleImpl@97f1c71, androidx.compose.runtime.BroadcastFrameClock@62fba56, androidx.compose.runtime.LaunchedEffectImpl@b060e7e, StandaloneCoroutine{Cancelling}@19cbad7, AndroidUiDispatcher@9f33fc4]
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: FATAL EXCEPTION: main
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: Process: com.example.navigators, PID: 29297
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: java.lang.SecurityException: To use the sampling rate of 0 microseconds, app needs to declare the normal permission HIGH_SAMPLING_RATE_SENSORS.
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at android.hardware.SystemSensorManager$BaseEventQueue.enableSensor(SystemSensorManager.java:1011)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at android.hardware.SystemSensorManager$BaseEventQueue.addSensor(SystemSensorManager.java:931)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at android.hardware.SystemSensorManager.registerListenerImpl(SystemSensorManager.java:345)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at android.hardware.SensorManager.registerListener(SensorManager.java:858)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at android.hardware.SensorManager.registerListener(SensorManager.java:765)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at com.example.navigators.SensorRecorder.start(SensorRecorder.kt:19)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at com.example.navigators.ui.main.NavigationViewModel.startNavigation(NavigationViewModel.kt:66)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at com.example.navigators.ui.main.ScreensKt$NavigationScreen$1$1.invokeSuspend(Screens.kt:200)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:101)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at androidx.compose.ui.platform.AndroidUiDispatcher.performTrampolineDispatch(AndroidUiDispatcher.android.kt:79)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at androidx.compose.ui.platform.AndroidUiDispatcher.access$performTrampolineDispatch(AndroidUiDispatcher.android.kt:41)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at androidx.compose.ui.platform.AndroidUiDispatcher$dispatchCallback$1.run(AndroidUiDispatcher.android.kt:57)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at android.os.Handler.handleCallback(Handler.java:1029)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at android.os.Handler.dispatchMessage(Handler.java:107)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:274)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:369)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:10090)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:616)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1137)
+09-13 10:46:40.824 29297 29297 E AndroidRuntime: 	Suppressed: kotlinx.coroutines.internal.DiagnosticCoroutineContextException: [androidx.compose.ui.platform.MotionDurationScaleImpl@90a48ee, androidx.compose.runtime.BroadcastFrameClock@1adc18f, androidx.compose.runtime.LaunchedEffectImpl@139e20a, StandaloneCoroutine{Cancelling}@b8f2c1c, AndroidUiDispatcher@50e8025]
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: FATAL EXCEPTION: main
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: Process: com.example.navigators, PID: 26260
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: com.chaquo.python.PyException: ModuleNotFoundError: No module named 'scipy'
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at <python>.navigation_core.ins.quaternion.<module>(quaternion.py:2)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at <python>.navigation_core.filtering.attitude.<module>(attitude.py:2)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at <python>.java.chaquopy.import_override(import.pxi:60)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at <python>.navigation_core.engine.<module>(engine.py:6)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at <python>.importlib._bootstrap._call_with_frames_removed(<frozen importlib._bootstrap>:241)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at <python>.importlib._bootstrap_external.exec_module(<frozen importlib._bootstrap_external>:883)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at <python>.java.android.importer.exec_module(importer.py:620)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at <python>.java.android.importer.exec_module(importer.py:708)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at <python>.importlib._bootstrap._load_unlocked(<frozen importlib._bootstrap>:688)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at <python>.importlib._bootstrap._find_and_load_unlocked(<frozen importlib._bootstrap>:1006)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at <python>.importlib._bootstrap._find_and_load(<frozen importlib._bootstrap>:1027)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at <python>.importlib._bootstrap._gcd_import(<frozen importlib._bootstrap>:1050)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at <python>.importlib.import_module(__init__.py:126)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at <python>.chaquopy_java.Java_com_chaquo_python_Python_getModuleNative(chaquopy_java.pyx:127)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at com.chaquo.python.Python.getModuleNative(Native Method)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at com.chaquo.python.Python.getModule(Python.java:84)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at com.example.navigators.PythonBridge.getOrInitEngine(PythonBridge.kt:14)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at com.example.navigators.PythonBridge.getOrInitEngine$default(PythonBridge.kt:12)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at com.example.navigators.PythonBridge.processImu(PythonBridge.kt:30)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at com.example.navigators.PythonBridge.processImu$default(PythonBridge.kt:27)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at com.example.navigators.ui.main.NavigationViewModel._init_$lambda$0(NavigationViewModel.kt:53)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at com.example.navigators.ui.main.NavigationViewModel$$ExternalSyntheticLambda0.invoke(D8$$SyntheticClass:0)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at com.example.navigators.SensorRecorder.onSensorChanged(SensorRecorder.kt:61)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at android.hardware.SystemSensorManager$SensorEventQueue.dispatchSensorEvent(SystemSensorManager.java:1199)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at android.os.MessageQueue.nativePollOnce(Native Method)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at android.os.MessageQueue.nextLegacy(MessageQueue.java:957)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at android.os.MessageQueue.next(MessageQueue.java:1099)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:217)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:369)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:10090)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:616)
+09-13 13:39:18.906 26260 26260 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1137)
+09-13 13:39:28.671 27861 27861 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 27861 (mple.navigators), pid 27861 (mple.navigators)
+09-13 13:39:29.703 28290 28290 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-13 13:39:29.703 28290 28290 F DEBUG   : Build fingerprint: 'POCO/breeze_p_in/breeze:16/BP2A.250605.031.A3/OS3.0.303.0.WNUINXM:user/release-keys'
+09-13 13:39:29.703 28290 28290 F DEBUG   : Revision: '0'
+09-13 13:39:29.703 28290 28290 F DEBUG   : ABI: 'arm64'
+09-13 13:39:29.703 28290 28290 F DEBUG   : Timestamp: 2026-09-13 13:39:28.802358204+0530
+09-13 13:39:29.703 28290 28290 F DEBUG   : Process uptime: 9s
+09-13 13:39:29.703 28290 28290 F DEBUG   : Cmdline: com.example.navigators
+09-13 13:39:29.703 28290 28290 F DEBUG   : pid: 27861, tid: 27861, name: mple.navigators  >>> com.example.navigators <<<
+09-13 13:39:29.703 28290 28290 F DEBUG   : uid: 10347
+09-13 13:39:29.703 28290 28290 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-13 13:39:29.703 28290 28290 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-13 13:39:29.703 28290 28290 F DEBUG   : Abort message: 'JNI DETECTED ERROR IN APPLICATION: JNI CallObjectMethodV called with pending exception com.chaquo.python.PyException: ModuleNotFoundError: No module named 'scipy'
+09-13 13:39:29.703 28290 28290 F DEBUG   : (Throwable with no stack trace)
+09-13 13:39:29.703 28290 28290 F DEBUG   : 
+09-13 13:39:29.703 28290 28290 F DEBUG   :     in call to CallObjectMethodV
+09-13 13:39:29.703 28290 28290 F DEBUG   :     from void android.os.MessageQueue.nativePollOnce(long, int)'
+09-13 13:39:29.703 28290 28290 F DEBUG   :     x0  0000000000000000  x1  0000000000006cd5  x2  0000000000000006  x3  0000007fe02723f0
+09-13 13:39:29.703 28290 28290 F DEBUG   :     x4  5151441f43445342  x5  5151441f43445342  x6  5151441f43445342  x7  7f7f7f7f7f7f7f7f
+09-13 13:39:29.703 28290 28290 F DEBUG   :     x8  00000000000000f0  x9  f6dc7f818c253186  x10 000000ff00000020  x11 00000000cb9fa30c
+09-13 13:39:29.703 28290 28290 F DEBUG   :     x12 000000000012800c  x13 000000007fffffff  x14 0000000005aa1dbe  x15 0000056eb569644a
+09-13 13:39:29.703 28290 28290 F DEBUG   :     x16 00000075e3d90110  x17 00000075e3d782c0  x18 00000075f89e8000  x19 0000000000006cd5
+09-13 13:39:29.703 28290 28290 F DEBUG   :     x20 0000000000006cd5  x21 00000000ffffffff  x22 000000732b421000  x23 00000075f7dc9740
+09-13 13:39:29.704 28290 28290 F DEBUG   :     x24 000000732b421000  x25 00000075f7dc9740  x26 0000007fe0272600  x27 00000075ea5dfe40
+09-13 13:39:29.704 28290 28290 F DEBUG   :     x28 00000075ea5dfe80  x29 0000007fe0272470
+09-13 13:39:29.704 28290 28290 F DEBUG   :     lr  00000075e3d13ba8  sp  0000007fe02723f0  pc  00000075e3d13bcc  pst 0000000000001000
+09-13 13:39:29.704 28290 28290 F DEBUG   : 50 total frames
+09-13 13:39:29.704 28290 28290 F DEBUG   : backtrace:
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #00 pc 0000000000070bcc  /apex/com.android.runtime/lib64/bionic/libc.so (abort+160) (BuildId: 56f2e102db31359cc22460be335d240c)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #01 pc 000000000060c628  /apex/com.android.art/lib64/libart.so (art::Runtime::Abort(char const*)+612) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #02 pc 000000000001644c  /apex/com.android.art/lib64/libbase.so (android::base::SetAborter(std::__1::function<void (char const*)>&&)::$_0::__invoke(char const*)+84) (BuildId: 6fabc39c947e59790084bf0be7368dcb)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #03 pc 0000000000015b8c  /apex/com.android.art/lib64/libbase.so (android::base::LogMessage::~LogMessage()+556) (BuildId: 6fabc39c947e59790084bf0be7368dcb)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #04 pc 000000000037e74c  /apex/com.android.art/lib64/libart.so (art::JavaVMExt::JniAbort(char const*, char const*)+1116) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #05 pc 0000000000378ec0  /apex/com.android.art/lib64/libart.so (art::(anonymous namespace)::ScopedCheck::AbortF(char const*, ...) (.__uniq.99033978352804627313491551960229047428)+184) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #06 pc 0000000000379bb8  /apex/com.android.art/lib64/libart.so (art::(anonymous namespace)::ScopedCheck::Check(art::ScopedObjectAccess&, bool, char const*, art::(anonymous namespace)::JniValueType*) (.__uniq.99033978352804627313491551960229047428)+2892) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #07 pc 0000000000374dbc  /apex/com.android.art/lib64/libart.so (art::(anonymous namespace)::CheckJNI::CallMethodV(char const*, _JNIEnv*, _jobject*, _jclass*, _jmethodID*, std::__va_list, art::Primitive::Type, art::InvokeType) (.__uniq.99033978352804627313491551960229047428)+256) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #08 pc 000000000064eca0  /apex/com.android.art/lib64/libart.so (art::(anonymous namespace)::CheckJNI::CallObjectMethodV(_JNIEnv*, _jobject*, _jmethodID*, std::__va_list) (.__uniq.99033978352804627313491551960229047428.llvm.8973975735480776547)+76) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #09 pc 000000000010c510  /system/lib64/libandroid_runtime.so (_JNIEnv::CallObjectMethod(_jobject*, _jmethodID*, ...)+124) (BuildId: d6bc768ea0ee243c27e135d31aae524c)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #10 pc 00000000001b4e10  /system/lib64/libandroid_runtime.so (android::NativeDisplayEventReceiver::dispatchVsync(long, android::PhysicalDisplayId, unsigned int, android::gui::VsyncEventData)+68) (BuildId: d6bc768ea0ee243c27e135d31aae524c)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #11 pc 0000000000232618  /system/lib64/libgui.so (android::DisplayEventDispatcher::handleEvent(int, int, void*)+600) (BuildId: 354e96b99b4a9e27d28fc4f11de609b4)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #12 pc 0000000000035b54  /system/lib64/libutils.so (android::Looper::pollOnce(int, int*, int*, void**)+660) (BuildId: 3e45b78f1a54bef7ad5274050b3915a7)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #13 pc 00000000001f3df0  /system/lib64/libandroid_runtime.so (android::android_os_MessageQueue_nativePollOnce(_JNIEnv*, _jobject*, long, int)+48) (BuildId: d6bc768ea0ee243c27e135d31aae524c)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #14 pc 000000000245111c  /memfd:jit-cache (deleted) (offset 0x2000000) (art_jni_trampoline+140)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #15 pc 000000000208258c  /memfd:jit-cache (deleted) (offset 0x2000000) (android.os.MessageQueue.nextLegacy+332)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #16 pc 00000000020822ec  /memfd:jit-cache (deleted) (offset 0x2000000) (android.os.MessageQueue.next+124)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #17 pc 00000000020815a8  /memfd:jit-cache (deleted) (offset 0x2000000) (android.os.Looper.loopOnce+168)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #18 pc 00000000002ab260  /apex/com.android.art/lib64/libart.so (art_quick_invoke_static_stub+640) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #19 pc 000000000087a970  /apex/com.android.art/lib64/libart.so (bool art::interpreter::DoCall<false>(art::ArtMethod*, art::Thread*, art::ShadowFrame&, art::Instruction const*, unsigned short, bool, art::JValue*)+1884) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #20 pc 00000000006fce54  /apex/com.android.art/lib64/libart.so (void art::interpreter::ExecuteSwitchImplCpp<false>(art::interpreter::SwitchImplContext*)+284) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #21 pc 00000000002fde48  /apex/com.android.art/lib64/libart.so (ExecuteSwitchImplAsm+8) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #22 pc 000000000029a734  /system/framework/framework.jar (offset 0x1234000) (android.os.Looper.loop+0)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #23 pc 000000000087ab14  /apex/com.android.art/lib64/libart.so (bool art::interpreter::DoCall<false>(art::ArtMethod*, art::Thread*, art::ShadowFrame&, art::Instruction const*, unsigned short, bool, art::JValue*)+2304) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #24 pc 00000000006fce54  /apex/com.android.art/lib64/libart.so (void art::interpreter::ExecuteSwitchImplCpp<false>(art::interpreter::SwitchImplContext*)+284) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.704 28290 28290 F DEBUG   :       #25 pc 00000000002fde48  /apex/com.android.art/lib64/libart.so (ExecuteSwitchImplAsm+8) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #26 pc 00000000001d93e0  /system/framework/framework.jar (offset 0x7000) (android.app.ActivityThread.main+0)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #27 pc 00000000002fda80  /apex/com.android.art/lib64/libart.so (art::interpreter::Execute(art::Thread*, art::CodeItemDataAccessor const&, art::ShadowFrame&, art::JValue, bool, bool) (.__uniq.112435418011751916792819755956732575238.llvm.8613519112829971472)+360) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #28 pc 00000000002fd404  /apex/com.android.art/lib64/libart.so (artQuickToInterpreterBridge+916) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #29 pc 00000000002c24d8  /apex/com.android.art/lib64/libart.so (art_quick_to_interpreter_bridge+88) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #30 pc 00000000002ab260  /apex/com.android.art/lib64/libart.so (art_quick_invoke_static_stub+640) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #31 pc 000000000029c070  /apex/com.android.art/lib64/libart.so (_jobject* art::InvokeMethod<(art::PointerSize)8>(art::ScopedObjectAccessAlreadyRunnable const&, _jobject*, _jobject*, _jobject*, unsigned long)+552) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #32 pc 0000000000635ed4  /apex/com.android.art/lib64/libart.so (art::Method_invoke(_JNIEnv*, _jobject*, _jobject*, _jobjectArray*) (.__uniq.165753521025965369065708152063621506277)+36) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #33 pc 00000000002c23a0  /apex/com.android.art/lib64/libart.so (art_quick_generic_jni_trampoline+144) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #34 pc 00000000002aaf94  /apex/com.android.art/lib64/libart.so (art_quick_invoke_stub+612) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #35 pc 000000000087a868  /apex/com.android.art/lib64/libart.so (bool art::interpreter::DoCall<false>(art::ArtMethod*, art::Thread*, art::ShadowFrame&, art::Instruction const*, unsigned short, bool, art::JValue*)+1620) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #36 pc 00000000006fcf7c  /apex/com.android.art/lib64/libart.so (void art::interpreter::ExecuteSwitchImplCpp<false>(art::interpreter::SwitchImplContext*)+580) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #37 pc 00000000002fde48  /apex/com.android.art/lib64/libart.so (ExecuteSwitchImplAsm+8) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #38 pc 000000000037463c  /system/framework/framework.jar (offset 0x2380000) (com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run+0)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #39 pc 00000000002fda80  /apex/com.android.art/lib64/libart.so (art::interpreter::Execute(art::Thread*, art::CodeItemDataAccessor const&, art::ShadowFrame&, art::JValue, bool, bool) (.__uniq.112435418011751916792819755956732575238.llvm.8613519112829971472)+360) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #40 pc 00000000002fd404  /apex/com.android.art/lib64/libart.so (artQuickToInterpreterBridge+916) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #41 pc 00000000002c24d8  /apex/com.android.art/lib64/libart.so (art_quick_to_interpreter_bridge+88) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #42 pc 0000000000ddb2f4  /data/misc/apexdata/com.android.art/dalvik-cache/arm64/boot.oat (com.android.internal.os.ZygoteInit.main+3828)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #43 pc 00000000002ab260  /apex/com.android.art/lib64/libart.so (art_quick_invoke_static_stub+640) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #44 pc 00000000002a8b8c  /apex/com.android.art/lib64/libart.so (art::JValue art::InvokeWithVarArgs<_jmethodID*>(art::ScopedObjectAccessAlreadyRunnable const&, _jobject*, _jmethodID*, std::__va_list)+760) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #45 pc 00000000006a44b4  /apex/com.android.art/lib64/libart.so (art::JNI<true>::CallStaticVoidMethodV(_JNIEnv*, _jclass*, _jmethodID*, std::__va_list)+164) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #46 pc 0000000000111abc  /system/lib64/libandroid_runtime.so (_JNIEnv::CallStaticVoidMethod(_jclass*, _jmethodID*, ...)+108) (BuildId: d6bc768ea0ee243c27e135d31aae524c)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #47 pc 000000000013eef8  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::start(char const*, android::Vector<android::String8> const&, bool)+1148) (BuildId: d6bc768ea0ee243c27e135d31aae524c)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #48 pc 000000000000275c  /system/bin/app_process64 (main+1692) (BuildId: d92284d47f0fef007a4696dde3ec5f24)
+09-13 13:39:29.705 28290 28290 F DEBUG   :       #49 pc 000000000006a054  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+124) (BuildId: 56f2e102db31359cc22460be335d240c)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: FATAL EXCEPTION: main
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: Process: com.example.navigators, PID: 28373
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: com.chaquo.python.PyException: ModuleNotFoundError: No module named 'scipy'
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at <python>.navigation_core.ins.quaternion.<module>(quaternion.py:2)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at <python>.navigation_core.filtering.attitude.<module>(attitude.py:2)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at <python>.java.chaquopy.import_override(import.pxi:60)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at <python>.navigation_core.engine.<module>(engine.py:6)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at <python>.importlib._bootstrap._call_with_frames_removed(<frozen importlib._bootstrap>:241)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at <python>.importlib._bootstrap_external.exec_module(<frozen importlib._bootstrap_external>:883)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at <python>.java.android.importer.exec_module(importer.py:620)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at <python>.java.android.importer.exec_module(importer.py:708)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at <python>.importlib._bootstrap._load_unlocked(<frozen importlib._bootstrap>:688)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at <python>.importlib._bootstrap._find_and_load_unlocked(<frozen importlib._bootstrap>:1006)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at <python>.importlib._bootstrap._find_and_load(<frozen importlib._bootstrap>:1027)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at <python>.importlib._bootstrap._gcd_import(<frozen importlib._bootstrap>:1050)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at <python>.importlib.import_module(__init__.py:126)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at <python>.chaquopy_java.Java_com_chaquo_python_Python_getModuleNative(chaquopy_java.pyx:127)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at com.chaquo.python.Python.getModuleNative(Native Method)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at com.chaquo.python.Python.getModule(Python.java:84)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at com.example.navigators.PythonBridge.getOrInitEngine(PythonBridge.kt:14)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at com.example.navigators.PythonBridge.getOrInitEngine$default(PythonBridge.kt:12)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at com.example.navigators.PythonBridge.processImu(PythonBridge.kt:30)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at com.example.navigators.PythonBridge.processImu$default(PythonBridge.kt:27)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at com.example.navigators.ui.main.NavigationViewModel._init_$lambda$0(NavigationViewModel.kt:53)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at com.example.navigators.ui.main.NavigationViewModel$$ExternalSyntheticLambda0.invoke(D8$$SyntheticClass:0)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at com.example.navigators.SensorRecorder.onSensorChanged(SensorRecorder.kt:61)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at android.hardware.SystemSensorManager$SensorEventQueue.dispatchSensorEvent(SystemSensorManager.java:1199)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at android.os.MessageQueue.nativePollOnce(Native Method)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at android.os.MessageQueue.nextLegacy(MessageQueue.java:957)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at android.os.MessageQueue.next(MessageQueue.java:1099)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at android.os.Looper.loopOnce(Looper.java:217)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at android.os.Looper.loop(Looper.java:369)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at android.app.ActivityThread.main(ActivityThread.java:10090)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at java.lang.reflect.Method.invoke(Native Method)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:616)
+09-13 13:39:35.410 28373 28373 E AndroidRuntime: 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1137)
+09-13 13:40:12.348 28577 28577 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 28577 (mple.navigators), pid 28577 (mple.navigators)
+09-13 13:40:13.115 29380 29380 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-13 13:40:13.115 29380 29380 F DEBUG   : Build fingerprint: 'POCO/breeze_p_in/breeze:16/BP2A.250605.031.A3/OS3.0.303.0.WNUINXM:user/release-keys'
+09-13 13:40:13.115 29380 29380 F DEBUG   : Revision: '0'
+09-13 13:40:13.115 29380 29380 F DEBUG   : ABI: 'arm64'
+09-13 13:40:13.115 29380 29380 F DEBUG   : Timestamp: 2026-09-13 13:40:12.522983396+0530
+09-13 13:40:13.115 29380 29380 F DEBUG   : Process uptime: 37s
+09-13 13:40:13.115 29380 29380 F DEBUG   : Cmdline: com.example.navigators
+09-13 13:40:13.115 29380 29380 F DEBUG   : pid: 28577, tid: 28577, name: mple.navigators  >>> com.example.navigators <<<
+09-13 13:40:13.115 29380 29380 F DEBUG   : uid: 10347
+09-13 13:40:13.115 29380 29380 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-13 13:40:13.115 29380 29380 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-13 13:40:13.115 29380 29380 F DEBUG   : Abort message: 'JNI DETECTED ERROR IN APPLICATION: JNI CallObjectMethodV called with pending exception com.chaquo.python.PyException: ModuleNotFoundError: No module named 'scipy'
+09-13 13:40:13.115 29380 29380 F DEBUG   : (Throwable with no stack trace)
+09-13 13:40:13.115 29380 29380 F DEBUG   : 
+09-13 13:40:13.115 29380 29380 F DEBUG   :     in call to CallObjectMethodV
+09-13 13:40:13.115 29380 29380 F DEBUG   :     from void android.os.MessageQueue.nativePollOnce(long, int)'
+09-13 13:40:13.115 29380 29380 F DEBUG   :     x0  0000000000000000  x1  0000000000006fa1  x2  0000000000000006  x3  0000007fe02723f0
+09-13 13:40:13.115 29380 29380 F DEBUG   :     x4  fefefefefefeff97  x5  fefefefefefeff97  x6  fefefefefefeff97  x7  7f7f7f7f7f7f7fff
+09-13 13:40:13.115 29380 29380 F DEBUG   :     x8  00000000000000f0  x9  c61fa44941729df0  x10 000000ff00000020  x11 00000000caba622d
+09-13 13:40:13.115 29380 29380 F DEBUG   :     x12 000000000012800c  x13 0000000000000004  x14 ffffffffffffffff  x15 0000056ee76671c3
+09-13 13:40:13.115 29380 29380 F DEBUG   :     x16 00000075e3d90110  x17 00000075e3d782c0  x18 00000075f89e8000  x19 0000000000006fa1
+09-13 13:40:13.115 29380 29380 F DEBUG   :     x20 0000000000006fa1  x21 00000000ffffffff  x22 000000732b421000  x23 00000075f7dc9740
+09-13 13:40:13.115 29380 29380 F DEBUG   :     x24 000000732b421000  x25 00000075f7dc9740  x26 0000007fe0272600  x27 00000075ea5dfe40
+09-13 13:40:13.115 29380 29380 F DEBUG   :     x28 00000075ea5dfe80  x29 0000007fe0272470
+09-13 13:40:13.115 29380 29380 F DEBUG   :     lr  00000075e3d13ba8  sp  0000007fe02723f0  pc  00000075e3d13bcc  pst 0000000000001000
+09-13 13:40:13.115 29380 29380 F DEBUG   : 50 total frames
+09-13 13:40:13.116 29380 29380 F DEBUG   : backtrace:
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #00 pc 0000000000070bcc  /apex/com.android.runtime/lib64/bionic/libc.so (abort+160) (BuildId: 56f2e102db31359cc22460be335d240c)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #01 pc 000000000060c628  /apex/com.android.art/lib64/libart.so (art::Runtime::Abort(char const*)+612) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #02 pc 000000000001644c  /apex/com.android.art/lib64/libbase.so (android::base::SetAborter(std::__1::function<void (char const*)>&&)::$_0::__invoke(char const*)+84) (BuildId: 6fabc39c947e59790084bf0be7368dcb)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #03 pc 0000000000015b8c  /apex/com.android.art/lib64/libbase.so (android::base::LogMessage::~LogMessage()+556) (BuildId: 6fabc39c947e59790084bf0be7368dcb)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #04 pc 000000000037e74c  /apex/com.android.art/lib64/libart.so (art::JavaVMExt::JniAbort(char const*, char const*)+1116) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #05 pc 0000000000378ec0  /apex/com.android.art/lib64/libart.so (art::(anonymous namespace)::ScopedCheck::AbortF(char const*, ...) (.__uniq.99033978352804627313491551960229047428)+184) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #06 pc 0000000000379bb8  /apex/com.android.art/lib64/libart.so (art::(anonymous namespace)::ScopedCheck::Check(art::ScopedObjectAccess&, bool, char const*, art::(anonymous namespace)::JniValueType*) (.__uniq.99033978352804627313491551960229047428)+2892) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #07 pc 0000000000374dbc  /apex/com.android.art/lib64/libart.so (art::(anonymous namespace)::CheckJNI::CallMethodV(char const*, _JNIEnv*, _jobject*, _jclass*, _jmethodID*, std::__va_list, art::Primitive::Type, art::InvokeType) (.__uniq.99033978352804627313491551960229047428)+256) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #08 pc 000000000064eca0  /apex/com.android.art/lib64/libart.so (art::(anonymous namespace)::CheckJNI::CallObjectMethodV(_JNIEnv*, _jobject*, _jmethodID*, std::__va_list) (.__uniq.99033978352804627313491551960229047428.llvm.8973975735480776547)+76) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #09 pc 000000000010c510  /system/lib64/libandroid_runtime.so (_JNIEnv::CallObjectMethod(_jobject*, _jmethodID*, ...)+124) (BuildId: d6bc768ea0ee243c27e135d31aae524c)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #10 pc 00000000001b4e10  /system/lib64/libandroid_runtime.so (android::NativeDisplayEventReceiver::dispatchVsync(long, android::PhysicalDisplayId, unsigned int, android::gui::VsyncEventData)+68) (BuildId: d6bc768ea0ee243c27e135d31aae524c)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #11 pc 0000000000232618  /system/lib64/libgui.so (android::DisplayEventDispatcher::handleEvent(int, int, void*)+600) (BuildId: 354e96b99b4a9e27d28fc4f11de609b4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #12 pc 0000000000035b54  /system/lib64/libutils.so (android::Looper::pollOnce(int, int*, int*, void**)+660) (BuildId: 3e45b78f1a54bef7ad5274050b3915a7)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #13 pc 00000000001f3df0  /system/lib64/libandroid_runtime.so (android::android_os_MessageQueue_nativePollOnce(_JNIEnv*, _jobject*, long, int)+48) (BuildId: d6bc768ea0ee243c27e135d31aae524c)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #14 pc 000000000212d61c  /memfd:jit-cache (deleted) (offset 0x2000000) (art_jni_trampoline+140)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #15 pc 000000000206964c  /memfd:jit-cache (deleted) (offset 0x2000000) (android.os.MessageQueue.nextLegacy+332)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #16 pc 00000000020693ac  /memfd:jit-cache (deleted) (offset 0x2000000) (android.os.MessageQueue.next+124)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #17 pc 0000000002068668  /memfd:jit-cache (deleted) (offset 0x2000000) (android.os.Looper.loopOnce+168)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #18 pc 00000000002ab260  /apex/com.android.art/lib64/libart.so (art_quick_invoke_static_stub+640) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #19 pc 000000000087a970  /apex/com.android.art/lib64/libart.so (bool art::interpreter::DoCall<false>(art::ArtMethod*, art::Thread*, art::ShadowFrame&, art::Instruction const*, unsigned short, bool, art::JValue*)+1884) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #20 pc 00000000006fce54  /apex/com.android.art/lib64/libart.so (void art::interpreter::ExecuteSwitchImplCpp<false>(art::interpreter::SwitchImplContext*)+284) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #21 pc 00000000002fde48  /apex/com.android.art/lib64/libart.so (ExecuteSwitchImplAsm+8) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #22 pc 000000000029a734  /system/framework/framework.jar (offset 0x1234000) (android.os.Looper.loop+0)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #23 pc 000000000087ab14  /apex/com.android.art/lib64/libart.so (bool art::interpreter::DoCall<false>(art::ArtMethod*, art::Thread*, art::ShadowFrame&, art::Instruction const*, unsigned short, bool, art::JValue*)+2304) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #24 pc 00000000006fce54  /apex/com.android.art/lib64/libart.so (void art::interpreter::ExecuteSwitchImplCpp<false>(art::interpreter::SwitchImplContext*)+284) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #25 pc 00000000002fde48  /apex/com.android.art/lib64/libart.so (ExecuteSwitchImplAsm+8) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #26 pc 00000000001d93e0  /system/framework/framework.jar (offset 0x7000) (android.app.ActivityThread.main+0)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #27 pc 00000000002fda80  /apex/com.android.art/lib64/libart.so (art::interpreter::Execute(art::Thread*, art::CodeItemDataAccessor const&, art::ShadowFrame&, art::JValue, bool, bool) (.__uniq.112435418011751916792819755956732575238.llvm.8613519112829971472)+360) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #28 pc 00000000002fd404  /apex/com.android.art/lib64/libart.so (artQuickToInterpreterBridge+916) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #29 pc 00000000002c24d8  /apex/com.android.art/lib64/libart.so (art_quick_to_interpreter_bridge+88) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #30 pc 00000000002ab260  /apex/com.android.art/lib64/libart.so (art_quick_invoke_static_stub+640) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #31 pc 000000000029c070  /apex/com.android.art/lib64/libart.so (_jobject* art::InvokeMethod<(art::PointerSize)8>(art::ScopedObjectAccessAlreadyRunnable const&, _jobject*, _jobject*, _jobject*, unsigned long)+552) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #32 pc 0000000000635ed4  /apex/com.android.art/lib64/libart.so (art::Method_invoke(_JNIEnv*, _jobject*, _jobject*, _jobjectArray*) (.__uniq.165753521025965369065708152063621506277)+36) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #33 pc 00000000002c23a0  /apex/com.android.art/lib64/libart.so (art_quick_generic_jni_trampoline+144) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #34 pc 00000000002aaf94  /apex/com.android.art/lib64/libart.so (art_quick_invoke_stub+612) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #35 pc 000000000087a868  /apex/com.android.art/lib64/libart.so (bool art::interpreter::DoCall<false>(art::ArtMethod*, art::Thread*, art::ShadowFrame&, art::Instruction const*, unsigned short, bool, art::JValue*)+1620) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #36 pc 00000000006fcf7c  /apex/com.android.art/lib64/libart.so (void art::interpreter::ExecuteSwitchImplCpp<false>(art::interpreter::SwitchImplContext*)+580) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #37 pc 00000000002fde48  /apex/com.android.art/lib64/libart.so (ExecuteSwitchImplAsm+8) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #38 pc 000000000037463c  /system/framework/framework.jar (offset 0x2380000) (com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run+0)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #39 pc 00000000002fda80  /apex/com.android.art/lib64/libart.so (art::interpreter::Execute(art::Thread*, art::CodeItemDataAccessor const&, art::ShadowFrame&, art::JValue, bool, bool) (.__uniq.112435418011751916792819755956732575238.llvm.8613519112829971472)+360) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #40 pc 00000000002fd404  /apex/com.android.art/lib64/libart.so (artQuickToInterpreterBridge+916) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #41 pc 00000000002c24d8  /apex/com.android.art/lib64/libart.so (art_quick_to_interpreter_bridge+88) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #42 pc 0000000000ddb2f4  /data/misc/apexdata/com.android.art/dalvik-cache/arm64/boot.oat (com.android.internal.os.ZygoteInit.main+3828)
+09-13 13:40:13.116 29380 29380 F DEBUG   :       #43 pc 00000000002ab260  /apex/com.android.art/lib64/libart.so (art_quick_invoke_static_stub+640) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.117 29380 29380 F DEBUG   :       #44 pc 00000000002a8b8c  /apex/com.android.art/lib64/libart.so (art::JValue art::InvokeWithVarArgs<_jmethodID*>(art::ScopedObjectAccessAlreadyRunnable const&, _jobject*, _jmethodID*, std::__va_list)+760) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.117 29380 29380 F DEBUG   :       #45 pc 00000000006a44b4  /apex/com.android.art/lib64/libart.so (art::JNI<true>::CallStaticVoidMethodV(_JNIEnv*, _jclass*, _jmethodID*, std::__va_list)+164) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:40:13.117 29380 29380 F DEBUG   :       #46 pc 0000000000111abc  /system/lib64/libandroid_runtime.so (_JNIEnv::CallStaticVoidMethod(_jclass*, _jmethodID*, ...)+108) (BuildId: d6bc768ea0ee243c27e135d31aae524c)
+09-13 13:40:13.117 29380 29380 F DEBUG   :       #47 pc 000000000013eef8  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::start(char const*, android::Vector<android::String8> const&, bool)+1148) (BuildId: d6bc768ea0ee243c27e135d31aae524c)
+09-13 13:40:13.117 29380 29380 F DEBUG   :       #48 pc 000000000000275c  /system/bin/app_process64 (main+1692) (BuildId: d92284d47f0fef007a4696dde3ec5f24)
+09-13 13:40:13.117 29380 29380 F DEBUG   :       #49 pc 000000000006a054  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+124) (BuildId: 56f2e102db31359cc22460be335d240c)
+09-13 13:43:04.716  4335  4335 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 4335 (mple.navigators), pid 4335 (mple.navigators)
+09-13 13:43:05.911  4812  4812 F DEBUG   : *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***
+09-13 13:43:05.911  4812  4812 F DEBUG   : Build fingerprint: 'POCO/breeze_p_in/breeze:16/BP2A.250605.031.A3/OS3.0.303.0.WNUINXM:user/release-keys'
+09-13 13:43:05.911  4812  4812 F DEBUG   : Revision: '0'
+09-13 13:43:05.911  4812  4812 F DEBUG   : ABI: 'arm64'
+09-13 13:43:05.911  4812  4812 F DEBUG   : Timestamp: 2026-09-13 13:43:04.935203851+0530
+09-13 13:43:05.911  4812  4812 F DEBUG   : Process uptime: 9s
+09-13 13:43:05.911  4812  4812 F DEBUG   : Cmdline: com.example.navigators
+09-13 13:43:05.911  4812  4812 F DEBUG   : pid: 4335, tid: 4335, name: mple.navigators  >>> com.example.navigators <<<
+09-13 13:43:05.911  4812  4812 F DEBUG   : uid: 10347
+09-13 13:43:05.911  4812  4812 F DEBUG   : tagged_addr_ctrl: 0000000000000001 (PR_TAGGED_ADDR_ENABLE)
+09-13 13:43:05.911  4812  4812 F DEBUG   : signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr --------
+09-13 13:43:05.911  4812  4812 F DEBUG   : Abort message: 'JNI DETECTED ERROR IN APPLICATION: JNI CallObjectMethodV called with pending exception com.chaquo.python.PyException: ModuleNotFoundError: No module named 'scipy'
+09-13 13:43:05.911  4812  4812 F DEBUG   : (Throwable with no stack trace)
+09-13 13:43:05.911  4812  4812 F DEBUG   : 
+09-13 13:43:05.911  4812  4812 F DEBUG   :     in call to CallObjectMethodV
+09-13 13:43:05.911  4812  4812 F DEBUG   :     from void android.os.MessageQueue.nativePollOnce(long, int)'
+09-13 13:43:05.911  4812  4812 F DEBUG   :     x0  0000000000000000  x1  00000000000010ef  x2  0000000000000006  x3  0000007fe02723f0
+09-13 13:43:05.911  4812  4812 F DEBUG   :     x4  fefefefefefeff97  x5  fefefefefefeff97  x6  fefefefefefeff97  x7  7f7f7f7f7f7f7fff
+09-13 13:43:05.911  4812  4812 F DEBUG   :     x8  00000000000000f0  x9  ed4ff7d1c579cfa6  x10 000000ff00000020  x11 00000000d5bde42f
+09-13 13:43:05.911  4812  4812 F DEBUG   :     x12 000000000012800c  x13 0000000000000004  x14 ffffffffffffffff  x15 0000056faca6e734
+09-13 13:43:05.911  4812  4812 F DEBUG   :     x16 00000075e3d90110  x17 00000075e3d782c0  x18 00000075f89e8000  x19 00000000000010ef
+09-13 13:43:05.911  4812  4812 F DEBUG   :     x20 00000000000010ef  x21 00000000ffffffff  x22 000000732b421000  x23 00000075f7dc9740
+09-13 13:43:05.911  4812  4812 F DEBUG   :     x24 000000732b421000  x25 00000075f7dc9740  x26 0000007fe0272600  x27 00000075ea5dfe40
+09-13 13:43:05.911  4812  4812 F DEBUG   :     x28 00000075ea5dfe80  x29 0000007fe0272470
+09-13 13:43:05.911  4812  4812 F DEBUG   :     lr  00000075e3d13ba8  sp  0000007fe02723f0  pc  00000075e3d13bcc  pst 0000000000001000
+09-13 13:43:05.912  4812  4812 F DEBUG   : 50 total frames
+09-13 13:43:05.912  4812  4812 F DEBUG   : backtrace:
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #00 pc 0000000000070bcc  /apex/com.android.runtime/lib64/bionic/libc.so (abort+160) (BuildId: 56f2e102db31359cc22460be335d240c)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #01 pc 000000000060c628  /apex/com.android.art/lib64/libart.so (art::Runtime::Abort(char const*)+612) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #02 pc 000000000001644c  /apex/com.android.art/lib64/libbase.so (android::base::SetAborter(std::__1::function<void (char const*)>&&)::$_0::__invoke(char const*)+84) (BuildId: 6fabc39c947e59790084bf0be7368dcb)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #03 pc 0000000000015b8c  /apex/com.android.art/lib64/libbase.so (android::base::LogMessage::~LogMessage()+556) (BuildId: 6fabc39c947e59790084bf0be7368dcb)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #04 pc 000000000037e74c  /apex/com.android.art/lib64/libart.so (art::JavaVMExt::JniAbort(char const*, char const*)+1116) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #05 pc 0000000000378ec0  /apex/com.android.art/lib64/libart.so (art::(anonymous namespace)::ScopedCheck::AbortF(char const*, ...) (.__uniq.99033978352804627313491551960229047428)+184) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #06 pc 0000000000379bb8  /apex/com.android.art/lib64/libart.so (art::(anonymous namespace)::ScopedCheck::Check(art::ScopedObjectAccess&, bool, char const*, art::(anonymous namespace)::JniValueType*) (.__uniq.99033978352804627313491551960229047428)+2892) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #07 pc 0000000000374dbc  /apex/com.android.art/lib64/libart.so (art::(anonymous namespace)::CheckJNI::CallMethodV(char const*, _JNIEnv*, _jobject*, _jclass*, _jmethodID*, std::__va_list, art::Primitive::Type, art::InvokeType) (.__uniq.99033978352804627313491551960229047428)+256) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #08 pc 000000000064eca0  /apex/com.android.art/lib64/libart.so (art::(anonymous namespace)::CheckJNI::CallObjectMethodV(_JNIEnv*, _jobject*, _jmethodID*, std::__va_list) (.__uniq.99033978352804627313491551960229047428.llvm.8973975735480776547)+76) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #09 pc 000000000010c510  /system/lib64/libandroid_runtime.so (_JNIEnv::CallObjectMethod(_jobject*, _jmethodID*, ...)+124) (BuildId: d6bc768ea0ee243c27e135d31aae524c)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #10 pc 00000000001b4e10  /system/lib64/libandroid_runtime.so (android::NativeDisplayEventReceiver::dispatchVsync(long, android::PhysicalDisplayId, unsigned int, android::gui::VsyncEventData)+68) (BuildId: d6bc768ea0ee243c27e135d31aae524c)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #11 pc 0000000000232618  /system/lib64/libgui.so (android::DisplayEventDispatcher::handleEvent(int, int, void*)+600) (BuildId: 354e96b99b4a9e27d28fc4f11de609b4)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #12 pc 0000000000035b54  /system/lib64/libutils.so (android::Looper::pollOnce(int, int*, int*, void**)+660) (BuildId: 3e45b78f1a54bef7ad5274050b3915a7)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #13 pc 00000000001f3df0  /system/lib64/libandroid_runtime.so (android::android_os_MessageQueue_nativePollOnce(_JNIEnv*, _jobject*, long, int)+48) (BuildId: d6bc768ea0ee243c27e135d31aae524c)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #14 pc 000000000212d88c  /memfd:jit-cache (deleted) (offset 0x2000000) (art_jni_trampoline+140)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #15 pc 000000000208023c  /memfd:jit-cache (deleted) (offset 0x2000000) (android.os.MessageQueue.nextLegacy+332)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #16 pc 000000000207ff9c  /memfd:jit-cache (deleted) (offset 0x2000000) (android.os.MessageQueue.next+124)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #17 pc 000000000207f258  /memfd:jit-cache (deleted) (offset 0x2000000) (android.os.Looper.loopOnce+168)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #18 pc 00000000002ab260  /apex/com.android.art/lib64/libart.so (art_quick_invoke_static_stub+640) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #19 pc 000000000087a970  /apex/com.android.art/lib64/libart.so (bool art::interpreter::DoCall<false>(art::ArtMethod*, art::Thread*, art::ShadowFrame&, art::Instruction const*, unsigned short, bool, art::JValue*)+1884) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #20 pc 00000000006fce54  /apex/com.android.art/lib64/libart.so (void art::interpreter::ExecuteSwitchImplCpp<false>(art::interpreter::SwitchImplContext*)+284) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #21 pc 00000000002fde48  /apex/com.android.art/lib64/libart.so (ExecuteSwitchImplAsm+8) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #22 pc 000000000029a734  /system/framework/framework.jar (offset 0x1234000) (android.os.Looper.loop+0)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #23 pc 000000000087ab14  /apex/com.android.art/lib64/libart.so (bool art::interpreter::DoCall<false>(art::ArtMethod*, art::Thread*, art::ShadowFrame&, art::Instruction const*, unsigned short, bool, art::JValue*)+2304) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.912  4812  4812 F DEBUG   :       #24 pc 00000000006fce54  /apex/com.android.art/lib64/libart.so (void art::interpreter::ExecuteSwitchImplCpp<false>(art::interpreter::SwitchImplContext*)+284) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #25 pc 00000000002fde48  /apex/com.android.art/lib64/libart.so (ExecuteSwitchImplAsm+8) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #26 pc 00000000001d93e0  /system/framework/framework.jar (offset 0x7000) (android.app.ActivityThread.main+0)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #27 pc 00000000002fda80  /apex/com.android.art/lib64/libart.so (art::interpreter::Execute(art::Thread*, art::CodeItemDataAccessor const&, art::ShadowFrame&, art::JValue, bool, bool) (.__uniq.112435418011751916792819755956732575238.llvm.8613519112829971472)+360) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #28 pc 00000000002fd404  /apex/com.android.art/lib64/libart.so (artQuickToInterpreterBridge+916) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #29 pc 00000000002c24d8  /apex/com.android.art/lib64/libart.so (art_quick_to_interpreter_bridge+88) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #30 pc 00000000002ab260  /apex/com.android.art/lib64/libart.so (art_quick_invoke_static_stub+640) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #31 pc 000000000029c070  /apex/com.android.art/lib64/libart.so (_jobject* art::InvokeMethod<(art::PointerSize)8>(art::ScopedObjectAccessAlreadyRunnable const&, _jobject*, _jobject*, _jobject*, unsigned long)+552) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #32 pc 0000000000635ed4  /apex/com.android.art/lib64/libart.so (art::Method_invoke(_JNIEnv*, _jobject*, _jobject*, _jobjectArray*) (.__uniq.165753521025965369065708152063621506277)+36) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #33 pc 00000000002c23a0  /apex/com.android.art/lib64/libart.so (art_quick_generic_jni_trampoline+144) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #34 pc 00000000002aaf94  /apex/com.android.art/lib64/libart.so (art_quick_invoke_stub+612) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #35 pc 000000000087a868  /apex/com.android.art/lib64/libart.so (bool art::interpreter::DoCall<false>(art::ArtMethod*, art::Thread*, art::ShadowFrame&, art::Instruction const*, unsigned short, bool, art::JValue*)+1620) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #36 pc 00000000006fcf7c  /apex/com.android.art/lib64/libart.so (void art::interpreter::ExecuteSwitchImplCpp<false>(art::interpreter::SwitchImplContext*)+580) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #37 pc 00000000002fde48  /apex/com.android.art/lib64/libart.so (ExecuteSwitchImplAsm+8) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #38 pc 000000000037463c  /system/framework/framework.jar (offset 0x2380000) (com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run+0)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #39 pc 00000000002fda80  /apex/com.android.art/lib64/libart.so (art::interpreter::Execute(art::Thread*, art::CodeItemDataAccessor const&, art::ShadowFrame&, art::JValue, bool, bool) (.__uniq.112435418011751916792819755956732575238.llvm.8613519112829971472)+360) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #40 pc 00000000002fd404  /apex/com.android.art/lib64/libart.so (artQuickToInterpreterBridge+916) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #41 pc 00000000002c24d8  /apex/com.android.art/lib64/libart.so (art_quick_to_interpreter_bridge+88) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #42 pc 0000000000ddb2f4  /data/misc/apexdata/com.android.art/dalvik-cache/arm64/boot.oat (com.android.internal.os.ZygoteInit.main+3828)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #43 pc 00000000002ab260  /apex/com.android.art/lib64/libart.so (art_quick_invoke_static_stub+640) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #44 pc 00000000002a8b8c  /apex/com.android.art/lib64/libart.so (art::JValue art::InvokeWithVarArgs<_jmethodID*>(art::ScopedObjectAccessAlreadyRunnable const&, _jobject*, _jmethodID*, std::__va_list)+760) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.913  4812  4812 F DEBUG   :       #45 pc 00000000006a44b4  /apex/com.android.art/lib64/libart.so (art::JNI<true>::CallStaticVoidMethodV(_JNIEnv*, _jclass*, _jmethodID*, std::__va_list)+164) (BuildId: cecb684d19b4f44ee3cbd66142c315f4)
+09-13 13:43:05.914  4812  4812 F DEBUG   :       #46 pc 0000000000111abc  /system/lib64/libandroid_runtime.so (_JNIEnv::CallStaticVoidMethod(_jclass*, _jmethodID*, ...)+108) (BuildId: d6bc768ea0ee243c27e135d31aae524c)
+09-13 13:43:05.914  4812  4812 F DEBUG   :       #47 pc 000000000013eef8  /system/lib64/libandroid_runtime.so (android::AndroidRuntime::start(char const*, android::Vector<android::String8> const&, bool)+1148) (BuildId: d6bc768ea0ee243c27e135d31aae524c)
+09-13 13:43:05.914  4812  4812 F DEBUG   :       #48 pc 000000000000275c  /system/bin/app_process64 (main+1692) (BuildId: d92284d47f0fef007a4696dde3ec5f24)
+09-13 13:43:05.914  4812  4812 F DEBUG   :       #49 pc 000000000006a054  /apex/com.android.runtime/lib64/bionic/libc.so (__libc_init+124) (BuildId: 56f2e102db31359cc22460be335d240c)

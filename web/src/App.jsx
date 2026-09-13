@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import { Activity, Map, Radio, List, Settings, HelpCircle, FileText, LayoutDashboard } from 'lucide-react';
 import './styles.css';
-import logoSrc from './assets/logo.png';
+import { TelemetryProvider } from './telemetry';
+
 
 import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
@@ -21,7 +22,15 @@ import Feedback from './pages/Feedback';
 import FeedbackDetail from './pages/FeedbackDetail';
 
 const History = () => <div className="card"><h2>History</h2><p>Diagnostic history.</p></div>;
-const SettingsPage = () => <div className="card"><h2>Settings</h2><p>App configuration.</p></div>;
+const SettingsPage = () => <div className="settings-page"><header className="page-heading"><div><span className="eyebrow">PREFERENCES & SYSTEM</span><h1>Settings</h1></div></header>{[
+  ['Navigation & sensors', 'Manage vehicle profiles and sensor calibration.', '/profiles', 'Vehicle profiles'],
+  ['Maps', 'Viewed tiles use the browser cache. Use Android for persistent offline maps.', '/navigation', 'Open map'],
+  ['AI & diagnostics', 'Inspect measured runtime and system availability.', '/health', 'System health'],
+  ['Data & privacy', 'Review recorded trips and exports.', '/sessions', 'Trip log'],
+  ['Appearance', 'Night instruments · high contrast surfaces and restrained navigation accents.', null, null],
+  ['Support', 'Report a problem or review product documentation.', '/feedback', 'Feedback & support'],
+  ['About', 'NAVIGATORS · Developed by Navigators', '/welcome', 'About Navigators']
+].map(([title,description,path,label]) => <section className="setting-row" key={title}><div><h2>{title}</h2><p>{description}</p></div>{path && <NavLink className="btn btn-outline" to={path}>{label}</NavLink>}</section>)}</div>;
 const FAQ = () => <div className="card"><h2>FAQ</h2><p>Help and questions.</p></div>;
 const Privacy = () => <div className="card"><h2>Privacy Policy</h2><p>Legal terms.</p></div>;
 const Terms = () => <div className="card"><h2>Terms & Conditions</h2><p>Legal terms.</p></div>;
@@ -29,78 +38,27 @@ const Cookies = () => <div className="card"><h2>Cookie Policy</h2><p>Legal terms
 const DocsHub = () => <div className="card"><h2>Documentation Hub</h2><p>Read the user guide and API docs.</p></div>;
 const NotFound = () => <div className="card"><h2>404</h2><p>Page not found.</p><NavLink to="/" className="btn btn-primary">Go to Landing</NavLink></div>;
 
-const AppShell = ({ children }) => {
-  return (
-    <div className="app-shell">
-      <nav className="sidebar">
-        <div style={{ padding: 'var(--space-4)', fontWeight: 'bold', borderBottom: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <img src={logoSrc} alt="Navigators" style={{ width: 32, height: 32, borderRadius: '6px', objectFit: 'cover' }} /> Navigators
-        </div>
-        
-        <div style={{ padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-          <NavLink to="/" end className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <Activity size={18} style={{marginRight: '8px'}}/> Welcome
-          </NavLink>
-          <NavLink to="/dashboard" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <LayoutDashboard size={18} style={{marginRight: '8px'}}/> Dashboard
-          </NavLink>
-          <NavLink to="/navigation" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <Map size={18} style={{marginRight: '8px'}}/> Navigation
-          </NavLink>
-          <NavLink to="/demo" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <FileText size={18} style={{marginRight: '8px'}}/> One-Click Demo
-          </NavLink>
-          <NavLink to="/profiles" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <Settings size={18} style={{marginRight: '8px'}}/> Profiles
-          </NavLink>
-          <NavLink to="/lab" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <Activity size={18} style={{marginRight: '8px'}}/> Navigation Lab
-          </NavLink>
-          <NavLink to="/experiments" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <List size={18} style={{marginRight: '8px'}}/> Experiments
-          </NavLink>
-          <NavLink to="/health" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <Radio size={18} style={{marginRight: '8px'}}/> System Health
-          </NavLink>
-          <NavLink to="/compatibility" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <Radio size={18} style={{marginRight: '8px'}}/> Device Matrix
-          </NavLink>
-          <NavLink to="/diagnostics" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <Radio size={18} style={{marginRight: '8px'}}/> Diagnostics
-          </NavLink>
-          <NavLink to="/sessions" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <List size={18} style={{marginRight: '8px'}}/> Sessions
-          </NavLink>
-          <NavLink to="/feedback" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <HelpCircle size={18} style={{marginRight: '8px'}}/> Feedback
-          </NavLink>
-          <NavLink to="/settings" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <Settings size={18} style={{marginRight: '8px'}}/> Settings
-          </NavLink>
-          <NavLink to="/docs" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
-            <HelpCircle size={18} style={{marginRight: '8px'}}/> Documentation
-          </NavLink>
-        </div>
-        
-        <div style={{ marginTop: 'auto', padding: 'var(--space-4)', borderTop: '1px solid var(--border-light)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-          <div><NavLink to="/privacy" style={{color: 'inherit'}}>Privacy</NavLink> | <NavLink to="/terms" style={{color: 'inherit'}}>Terms</NavLink> | <NavLink to="/cookies" style={{color: 'inherit'}}>Cookies</NavLink></div>
-          <div style={{marginTop: 'var(--space-2)'}}>Developed by Navigators</div>
-        </div>
-      </nav>
-      
-      <main className="main-content" style={{ padding: 'var(--space-6)' }}>
-        {children}
-      </main>
-    </div>
-  );
-};
+const primary = [
+  ['/dashboard', 'Navigation', Activity], ['/navigation', 'Map', Map],
+  ['/sessions', 'Trips', List], ['/diagnostics', 'Diagnostics', Radio], ['/settings', 'Settings', Settings]
+];
+const AppShell = ({ children }) => <div className="app-shell">
+  <aside className="sidebar">
+    <NavLink to="/dashboard" className="brand"><img src="/logo192.png" alt=""/><span>NAVIGATORS<small>NAVIGATION SYSTEMS</small></span></NavLink>
+    <nav aria-label="Primary navigation" className="primary-nav">{primary.map(([path, label, Icon]) => <NavLink key={path} to={path} className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}><Icon size={19} strokeWidth={1.6}/><span>{label}</span></NavLink>)}</nav>
+    <details className="engineering-nav"><summary>Engineering tools</summary><nav aria-label="Engineering tools">{[['/profiles','Vehicle profiles'],['/lab','Navigation lab'],['/experiments','Experiments'],['/health','System health'],['/compatibility','Device compatibility'],['/benchmark','Benchmarks'],['/demo','Replay demo'],['/feedback','Feedback'],['/docs','Documentation'],['/welcome','About Navigators']].map(([path,label]) => <NavLink key={path} to={path}>{label}</NavLink>)}</nav></details>
+    <footer className="sidebar-footer"><span>Developed by Navigators</span><div><NavLink to="/privacy">Privacy</NavLink><NavLink to="/terms">Terms</NavLink><NavLink to="/cookies">Cookies</NavLink></div></footer>
+  </aside>
+  <main className="main-content" id="main-content">{children}</main>
+</div>;
 
 export default function App() {
   return (
     <Router>
-      <AppShell>
+      <TelemetryProvider><AppShell>
         <Routes>
-          <Route path="/" element={<Landing />} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/welcome" element={<Landing />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/navigation" element={<Navigation />} />
           <Route path="/health" element={<SystemHealth />} />
@@ -124,7 +82,7 @@ export default function App() {
           <Route path="/cookies" element={<Cookies />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </AppShell>
+      </AppShell></TelemetryProvider>
     </Router>
   );
 }

@@ -75,6 +75,8 @@ class NavigationEngine:
         """
         Processes a single IMU tick. Called directly from Android SensorEventListener.
         """
+        accel = np.asarray(accel, dtype=float)
+        gyro = np.asarray(gyro, dtype=float)
         self.current_time = timestamp
         
         # Sync & Health (Phase 2)
@@ -166,5 +168,8 @@ class NavigationEngine:
             "course": np.degrees(np.arctan2(s.velocity_east, s.velocity_north)),
             "mode": s.mode.name,
             "pos_uncertainty": s.pos_uncertainty,
-            "explanation": s.get_confidence_explanation()
+            "explanation": s.get_confidence_explanation(),
+            "confidence": s.get_confidence_explanation()["confidence"],
+            "ai_status": "ACTIVE" if self.speed_estimator.is_available and self.speed_estimator.last_inference_latency_ms > 0 else "UNAVAILABLE",
+            "heading_valid": s.speed_m_s > 0.5
         }

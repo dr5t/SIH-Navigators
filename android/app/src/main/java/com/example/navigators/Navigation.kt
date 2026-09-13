@@ -1,6 +1,8 @@
 package com.example.navigators
 
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -17,24 +19,28 @@ import com.example.navigators.ui.main.*
 @Composable
 fun NavigatorsApp() {
     val navController = rememberNavController()
+    val navigationViewModel: NavigationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    var mapVisited by remember { mutableStateOf(false) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    LaunchedEffect(currentRoute) { if (currentRoute == "navigation") mapVisited = true }
     Scaffold(
         bottomBar = {
             NavigationBar(
                 containerColor = MaterialTheme.colorScheme.surface,
             ) {
                 val items = listOf(
-                    NavigationItem("Dashboard", Icons.Default.Home, "dashboard"),
-                    NavigationItem("Map", Icons.Default.Place, "navigation"),
-                    NavigationItem("Health", Icons.Default.Build, "diagnostics"),
-                    NavigationItem("Settings", Icons.Default.Settings, "settings")
+                    NavigationItem("Navigate", Icons.Outlined.Navigation, "dashboard"),
+                    NavigationItem("Map", Icons.Outlined.Map, "navigation"),
+                    NavigationItem("Trips", Icons.Outlined.Route, "trips"),
+                    NavigationItem("Diagnostics", Icons.Outlined.Tune, "diagnostics"),
+                    NavigationItem("Settings", Icons.Outlined.Settings, "settings")
                 )
                 items.forEach { item ->
                     NavigationBarItem(
                         icon = { Icon(item.icon, contentDescription = item.title) },
-                        label = { Text(item.title) },
+                        label = { Text(item.title, maxLines = 1, style = MaterialTheme.typography.labelSmall) },
                         selected = currentRoute == item.route,
                         onClick = {
                             navController.navigate(item.route) {
@@ -48,16 +54,23 @@ fun NavigatorsApp() {
             }
         }
     ) { innerPadding ->
-        NavHost(navController, startDestination = "dashboard", Modifier.padding(innerPadding)) {
-            composable("dashboard") { DashboardScreen(navController) }
+        Box(Modifier.padding(innerPadding).fillMaxSize()) {
+        if (mapVisited) NavigationScreen(navigationViewModel, currentRoute == "navigation")
+        NavHost(navController, startDestination = "dashboard") {
+            composable("dashboard") { DashboardScreen(navController, navigationViewModel) }
             composable("summary/{sessionId}") { SummaryScreen(navController) }
-            composable("navigation") { NavigationScreen() }
-            composable("diagnostics") { DiagnosticsScreen() }
+            composable("navigation") {}
+            composable("trips") { TripsScreen(navController) }
+            composable("diagnostics") { DiagnosticsScreen(navigationViewModel) }
             composable("settings") { SettingsScreen(navController) }
+            composable("feedback_center") { FeedbackCenterScreen(navController) }
+            composable("feedback_form/{type}") { FeedbackFormScreen(navController, it.arguments?.getString("type") ?: "bug") }
+            composable("support_center") { SupportCenterScreen(navController) }
             composable("faq") { FaqScreen() }
             composable("privacy") { LegalScreen("Privacy Policy") }
             composable("terms") { LegalScreen("Terms & Conditions") }
             composable("cookies") { LegalScreen("Cookie Policy") }
+        }
         }
     }
 }

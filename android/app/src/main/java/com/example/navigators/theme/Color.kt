@@ -2,20 +2,24 @@ package com.example.navigators.theme
 
 import androidx.compose.ui.graphics.Color
 
-val BgBase = Color(0xFF0F1115)
-val BgSurface = Color(0xFF1A1D24)
-val BgSurfaceElevated = Color(0xFF242830)
+// Deep absolute backgrounds
+val BgBase = Color(0xFF06090D) // Near-black navy
+val BgSurface = Color(0xFF0F151C) // Deep panel
+val BgSurfaceElevated = Color(0xFF161F2A) // Elevated card
 
-val TextPrimary = Color(0xFFF0F2F5)
-val TextSecondary = Color(0xFFA0A5B1)
-val TextMuted = Color(0xFF6B7280)
+// Technical High-Contrast Typography
+val TextPrimary = Color(0xFFFFFFFF)
+val TextSecondary = Color(0xFF90A4AE)
+val TextMuted = Color(0xFF546E7A)
 
-val BrandPrimary = Color(0xFF3B82F6)
-val BrandPrimaryHover = Color(0xFF2563EB)
+// Restrained Navigation Accent
+val BrandPrimary = Color(0xFF00B0FF) // Sharp cyan
+val BrandPrimaryHover = Color(0xFF0081CB)
 
-val StatusSuccess = Color(0xFF10B981)
-val StatusWarning = Color(0xFFF59E0B)
-val StatusError = Color(0xFFEF4444)
-val StatusDR = Color(0xFF8B5CF6)
+// Strict Semantics
+val StatusSuccess = Color(0xFF00E676) // Bright green for fixed
+val StatusWarning = Color(0xFFFFAB00) // Amber for Dead Reckoning/Warning
+val StatusError = Color(0xFFFF3D00) // Red for Lost/Error
+val StatusDR = Color(0xFFFFAB00)
 
 val BorderLight = Color(0x1AFFFFFF)

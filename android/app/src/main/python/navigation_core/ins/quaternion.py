@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.spatial.transform import Rotation
 
 class Quaternion:
     """
@@ -17,9 +16,11 @@ class Quaternion:
             
     def to_matrix(self) -> np.ndarray:
         w, x, y, z = self.q
-        # Scipy uses scalar-last [x, y, z, w]
-        rot = Rotation.from_quat([x, y, z, w])
-        return rot.as_matrix()
+        return np.array([
+            [1 - 2*(y*y + z*z), 2*(x*y - w*z), 2*(x*z + w*y)],
+            [2*(x*y + w*z), 1 - 2*(x*x + z*z), 2*(y*z - w*x)],
+            [2*(x*z - w*y), 2*(y*z + w*x), 1 - 2*(x*x + y*y)]
+        ])
         
     def update(self, angular_rate: np.ndarray, dt: float):
         """

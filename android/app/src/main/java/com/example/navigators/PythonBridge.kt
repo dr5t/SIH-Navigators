@@ -9,7 +9,7 @@ class PythonBridge(private val context: android.content.Context) {
     // Engine is initialized dynamically when first GNSS point arrives to avoid hardcoded reference points
     private var fusionEngine: PyObject? = null
 
-    private fun getOrInitEngine(lat: Double = 0.0, lon: Double = 0.0, alt: Double = 0.0): PyObject {
+    private fun getOrInitEngine(lat: Double, lon: Double, alt: Double): PyObject {
         if (fusionEngine == null) {
             val module = py.getModule("navigation_core.engine")
             val engine = module.callAttr("NavigationEngine", lat, lon, alt)
@@ -24,10 +24,12 @@ class PythonBridge(private val context: android.content.Context) {
         return fusionEngine!!
     }
 
+    fun reset() { fusionEngine = null }
+
     fun processImu(accel: FloatArray, gyro: FloatArray, dt: Double, timestamp: Double, isExternal: Boolean = false): Map<String, Any> {
-        // If engine isn't initialized by GNSS yet, initialize with 0,0,0 reference. 
-        // In a real flow, you might want to wait for GNSS, but for DR-only starts we need an engine.
-        val state = getOrInitEngine().callAttr("process_imu", accel, gyro, dt, timestamp, isExternal)
+        // Dead reckoning needs a real geodetic origin. Wait for GNSS on a cold start.
+        val engine = fusionEngine ?: return emptyMap()
+        val state = engine.callAttr("process_imu", accel, gyro, dt, timestamp)
         return state.asMap().mapKeys { it.key.toString() }.mapValues { it.value.toString() }
     }
 

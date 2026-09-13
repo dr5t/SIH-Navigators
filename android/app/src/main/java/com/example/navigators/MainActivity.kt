@@ -10,8 +10,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Initialize osmdroid configuration for caching and map rendering
-        Configuration.getInstance().load(applicationContext, applicationContext.getSharedPreferences("osmdroid", android.content.Context.MODE_PRIVATE))
+        // Critical Map fix: Initialize osmdroid configuration
+        Configuration.getInstance().load(this, android.preference.PreferenceManager.getDefaultSharedPreferences(this))
+        Configuration.getInstance().userAgentValue = packageName
         
         setContent {
             NavigatorsTheme {

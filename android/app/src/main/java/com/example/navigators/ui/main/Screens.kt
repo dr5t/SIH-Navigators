@@ -1,8 +1,7 @@
 package com.example.navigators.ui.main
-
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -10,360 +9,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.navigators.theme.*
-
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import com.example.navigators.data.ProfileManager
 import com.example.navigators.data.VehicleProfile
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DashboardScreen(navController: NavController) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val settingsManager = remember { com.example.navigators.data.SettingsManager(context) }
-    
-    Column(Modifier.padding(16.dp).fillMaxSize()) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-            Column {
-                Text("Dashboard", style = MaterialTheme.typography.titleLarge)
-                Text("Real-time navigation and sensor overview.", color = TextMuted)
-            }
-            if (settingsManager.isLocalOnlyMode) {
-                Surface(
-                    color = StatusWarning.copy(alpha = 0.2f), 
-                    shape = MaterialTheme.shapes.small
-                ) {
-                    Text("Cloud Sync Disabled", color = StatusWarning, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelSmall)
-                }
-            }
-        }
-        
-        Spacer(Modifier.height(24.dp))
-        
-        var showExplanation by remember { mutableStateOf(false) }
-        val mockExplanation = mapOf(
-            "confidence" to "LOW",
-            "reasons" to listOf("GNSS unavailable or rejected", "Position uncertainty increased to 31 m"),
-            "mitigations" to listOf("AI speed active", "Vehicle constraints active"),
-            "actions" to listOf("Run Diagnostics", "Check GNSS", "Recalibrate")
-        )
-
-        Card(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-            colors = CardDefaults.cardColors(containerColor = BgSurfaceElevated)
-        ) {
-            Column(Modifier.padding(16.dp)) {
-                Text("Navigation Status", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Spacer(Modifier.height(8.dp))
-                Surface(
-                    onClick = { showExplanation = true },
-                    color = StatusError.copy(alpha = 0.2f), 
-                    shape = MaterialTheme.shapes.small
-                ) {
-                    Text("Confidence: LOW", color = StatusError, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
-                }
-            }
-        }
-
-        if (showExplanation) {
-            ModalBottomSheet(onDismissRequest = { showExplanation = false }) {
-                Column(Modifier.padding(16.dp).padding(bottom = 32.dp)) {
-                    Text("Navigation Status", style = MaterialTheme.typography.titleLarge)
-                    Text("Confidence: ${mockExplanation["confidence"]}", color = StatusError, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 16.dp))
-                    
-                    Text("Reasons:", fontWeight = FontWeight.SemiBold)
-                    (mockExplanation["reasons"] as List<String>).forEach {
-                        Text("• $it", color = TextSecondary, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
-                    }
-                    
-                    Spacer(Modifier.height(16.dp))
-                    Text("Current Mitigation:", fontWeight = FontWeight.SemiBold)
-                    (mockExplanation["mitigations"] as List<String>).forEach {
-                        Text("✓ $it", color = StatusSuccess, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
-                    }
-                    
-                    Spacer(Modifier.height(24.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        (mockExplanation["actions"] as List<String>).forEach { action ->
-                            Button(onClick = { showExplanation = false }, modifier = Modifier.weight(1f)) {
-                                Text(action)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        Card(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-            colors = CardDefaults.cardColors(containerColor = BgSurfaceElevated)
-        ) {
-            Column(Modifier.padding(16.dp)) {
-                Text("Current Telemetry", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Spacer(Modifier.height(8.dp))
-                Text("45 km/h", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                Text("Heading: 270° (W)", color = TextSecondary)
-            }
-        }
-        
-        Card(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-            colors = CardDefaults.cardColors(containerColor = BgSurfaceElevated)
-        ) {
-            Column(Modifier.padding(16.dp)) {
-                Text("Sensor Health", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Spacer(Modifier.height(8.dp))
-                Surface(color = StatusWarning.copy(alpha = 0.2f), shape = MaterialTheme.shapes.small) {
-                    Text("Diagnostics Required", color = StatusWarning, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
-                }
-            }
-        }
-        
-        Spacer(Modifier.weight(1f))
-        
-        // Field Test Controls
-        var isTesting by remember { mutableStateOf(false) }
-        val context = androidx.compose.ui.platform.LocalContext.current
-        var showCalibrationWarning by remember { mutableStateOf(false) }
-        
-        if (showCalibrationWarning) {
-            AlertDialog(
-                onDismissRequest = { showCalibrationWarning = false },
-                title = { Text("Calibration Required") },
-                text = { Text("The currently selected vehicle profile is not calibrated or missing. Please calibrate your device first or select a calibrated profile before starting navigation.") },
-                confirmButton = {
-                    Button(onClick = { showCalibrationWarning = false }) {
-                        Text("OK")
-                    }
-                }
-            )
-        }
-        
-        Button(
-            onClick = {
-                val profileManager = com.example.navigators.data.ProfileManager(context)
-                val activeProfileId = profileManager.getActiveProfileId()
-                
-                if (!isTesting && (activeProfileId == null || !profileManager.isProfileCalibrated(activeProfileId))) {
-                    showCalibrationWarning = true
-                    return@Button
-                }
-
-                val intent = android.content.Intent(context, Class.forName("com.example.navigators.FieldTestService"))
-                if (isTesting) {
-                    intent.action = "com.example.navigators.STOP_FIELD_TEST"
-                    context.startService(intent)
-                    isTesting = false
-                    navController.navigate("summary/latest")
-                } else {
-                    intent.action = "com.example.navigators.START_FIELD_TEST"
-                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                        context.startForegroundService(intent)
-                    } else {
-                        context.startService(intent)
-                    }
-                    isTesting = true
-                }
-            },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (isTesting) MaterialTheme.colorScheme.error else BrandPrimary
-            )
-        ) {
-            Text(
-                if (isTesting) "STOP FIELD TEST" else "START FIELD TEST",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
-
-@OptIn(com.google.accompanist.permissions.ExperimentalPermissionsApi::class)
-@Composable
-fun NavigationScreen(
-    viewModel: NavigationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-) {
-    val uiState by viewModel.uiState.collectAsState()
-    
-    val locationPermissionState = com.google.accompanist.permissions.rememberMultiplePermissionsState(
-        permissions = listOf(
-            android.Manifest.permission.ACCESS_FINE_LOCATION,
-            android.Manifest.permission.ACCESS_COARSE_LOCATION
-        )
-    )
-
-    LaunchedEffect(Unit) {
-        if (!locationPermissionState.allPermissionsGranted) {
-            locationPermissionState.launchMultiplePermissionRequest()
-        } else {
-            viewModel.startNavigation()
-        }
-    }
-    
-    LaunchedEffect(locationPermissionState.allPermissionsGranted) {
-        if (locationPermissionState.allPermissionsGranted) {
-            viewModel.startNavigation()
-        }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.stopNavigation()
-        }
-    }
-
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val mapView = remember {
-        org.osmdroid.views.MapView(context).apply {
-            setTileSource(org.osmdroid.tileprovider.tilesource.TileSourceFactory.MAPNIK)
-            setMultiTouchControls(true)
-            controller.setZoom(18.0)
-        }
-    }
-    
-    val vehicleMarker = remember {
-        org.osmdroid.views.overlay.Marker(mapView).apply {
-            setAnchor(org.osmdroid.views.overlay.Marker.ANCHOR_CENTER, org.osmdroid.views.overlay.Marker.ANCHOR_CENTER)
-            // Ideally use a custom arrow drawable here. For now we use the default and rotate it.
-        }
-    }
-    
-    val trajectoryLine = remember {
-        org.osmdroid.views.overlay.Polyline().apply {
-            outlinePaint.color = android.graphics.Color.BLUE
-            outlinePaint.strokeWidth = 10f
-        }
-    }
-
-    LaunchedEffect(uiState.lat, uiState.lon, uiState.isInitialized) {
-        if (uiState.isInitialized) {
-            val geoPoint = org.osmdroid.util.GeoPoint(uiState.lat, uiState.lon)
-            
-            // Only re-center if we haven't manually panned (simplified for now, always re-centers)
-            mapView.controller.animateTo(geoPoint)
-            
-            vehicleMarker.position = geoPoint
-            vehicleMarker.rotation = uiState.course.toFloat()
-            if (!mapView.overlays.contains(vehicleMarker)) {
-                mapView.overlays.add(vehicleMarker)
-            }
-            
-            val geoPoints = uiState.trajectory.map { org.osmdroid.util.GeoPoint(it.first, it.second) }
-            trajectoryLine.setPoints(geoPoints)
-            if (!mapView.overlays.contains(trajectoryLine)) {
-                mapView.overlays.add(0, trajectoryLine)
-            }
-            
-            mapView.invalidate()
-        }
-    }
-
-    Column(Modifier.fillMaxSize()) {
-        Column(Modifier.padding(16.dp)) {
-            Text("Navigation", style = MaterialTheme.typography.titleLarge)
-            Text("Live vehicle telemetry and map view.", color = TextMuted)
-        }
-        
-        Box(Modifier.fillMaxSize().weight(1f)) {
-            if (locationPermissionState.allPermissionsGranted) {
-                androidx.compose.ui.viewinterop.AndroidView(
-                    factory = { mapView },
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Surface(color = BgSurfaceElevated, modifier = Modifier.fillMaxSize()) {
-                    Box(contentAlignment = androidx.compose.ui.Alignment.Center) {
-                        Text("Location Permission Required", color = TextSecondary)
-                    }
-                }
-            }
-            
-            // HUD
-            Surface(
-                color = BgSurfaceElevated,
-                shape = MaterialTheme.shapes.medium,
-                modifier = Modifier.padding(16.dp).align(androidx.compose.ui.Alignment.BottomStart)
-            ) {
-                Row(Modifier.padding(16.dp)) {
-                    Column {
-                        Text("Current Speed", color = TextMuted, style = MaterialTheme.typography.labelSmall)
-                        val speedKmh = String.format("%.1f", uiState.speed * 3.6)
-                        Text("$speedKmh km/h", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                    }
-                    Spacer(Modifier.width(24.dp))
-                    Column {
-                        Text("Navigation Mode", color = TextMuted, style = MaterialTheme.typography.labelSmall)
-                        Text(uiState.mode, color = StatusSuccess, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        val uncMeters = String.format("%.1f", uiState.posUncertainty)
-                        Text("Uncertainty: $uncMeters m", color = TextMuted, style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun DiagnosticsScreen() {
-    var isRunning by remember { mutableStateOf(false) }
-    
-    Column(Modifier.padding(16.dp).fillMaxSize()) {
-        Text("System Diagnostics", style = MaterialTheme.typography.titleLarge)
-        Text("Validate sensor hardware.", color = TextMuted)
-        
-        Spacer(Modifier.height(24.dp))
-        
-        Button(
-            onClick = { isRunning = true },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isRunning
-        ) {
-            Text(if (isRunning) "Running..." else "Run Diagnostics")
-        }
-        
-        Spacer(Modifier.height(24.dp))
-        
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = BgSurfaceElevated)
-        ) {
-            Column(Modifier.padding(16.dp)) {
-                Text("Hardware Status", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                Spacer(Modifier.height(16.dp))
-                
-                DiagnosticRow("Accelerometer (INS)", "Optimal", true)
-                DiagnosticRow("Gyroscope (INS)", "Optimal", true)
-                DiagnosticRow("Magnetometer", "Calibrating...", false)
-                DiagnosticRow("GNSS Receiver", "Optimal", true)
-            }
-        }
-    }
-}
-
-@Composable
-fun DiagnosticRow(name: String, status: String, isSuccess: Boolean) {
-    Row(
-        Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-    ) {
-        Text(name, fontWeight = FontWeight.Medium)
-        Surface(
-            color = if (isSuccess) StatusSuccess.copy(alpha = 0.2f) else StatusWarning.copy(alpha = 0.2f),
-            shape = MaterialTheme.shapes.small
-        ) {
-            Text(
-                text = status,
-                color = if (isSuccess) StatusSuccess else StatusWarning,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                style = MaterialTheme.typography.labelSmall
-            )
-        }
-    }
-}
-
-
 
 @Composable
 fun SettingsScreen(navController: NavController) {
@@ -381,14 +29,15 @@ fun SettingsScreen(navController: NavController) {
         isLoadingProfiles = false
     }
     
-    Column(Modifier.padding(16.dp)) {
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
         Text("Settings", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(16.dp))
         
-        Text("Vehicle & Sensor Profiles", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Card(
+        Text("Navigation & Sensors", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Surface(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            colors = CardDefaults.cardColors(containerColor = BgSurfaceElevated)
+            color = BgSurfaceElevated,
+            shape = MaterialTheme.shapes.small
         ) {
             Column(Modifier.padding(16.dp)) {
                 if (isLoadingProfiles) {
@@ -422,13 +71,15 @@ fun SettingsScreen(navController: NavController) {
 
         Spacer(Modifier.height(16.dp))
         
-        Text("AI Navigation Models", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Card(
+        Text("AI", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Surface(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            colors = CardDefaults.cardColors(containerColor = BgSurfaceElevated)
+            color = BgSurfaceElevated,
+            shape = MaterialTheme.shapes.small
         ) {
             Column(Modifier.padding(16.dp)) {
-                Text("Current Version: v1.0-base")
+                Text("Model updates", fontWeight = FontWeight.Medium)
+                Text("Inference availability is reported in Diagnostics.", color = TextSecondary)
                 Spacer(Modifier.height(8.dp))
                 Button(
                     onClick = {
@@ -454,10 +105,11 @@ fun SettingsScreen(navController: NavController) {
         
         Spacer(Modifier.height(16.dp))
         
-        Text("Data & Privacy Controls", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-        Card(
+        Text("Data & Privacy", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Surface(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            colors = CardDefaults.cardColors(containerColor = BgSurfaceElevated)
+            color = BgSurfaceElevated,
+            shape = MaterialTheme.shapes.small
         ) {
             val settingsManager = remember { com.example.navigators.data.SettingsManager(context) }
             var isLocalOnly by remember { mutableStateOf(settingsManager.isLocalOnlyMode) }
@@ -478,7 +130,7 @@ fun SettingsScreen(navController: NavController) {
 
             Column(Modifier.padding(16.dp)) {
                 Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Column {
+                    Column(Modifier.weight(1f)) {
                         Text("Cloud Sync (Local-Only Mode)", fontWeight = FontWeight.Medium)
                         Text(if (isLocalOnly) "OFF - Data remains local" else "ON - Data syncs to cloud", color = TextMuted, style = MaterialTheme.typography.bodySmall)
                     }
@@ -543,6 +195,12 @@ fun SettingsScreen(navController: NavController) {
         }
         
         Spacer(Modifier.height(16.dp))
+        Text("Maps", style = MaterialTheme.typography.titleMedium)
+        Text("Viewed map tiles are stored on this device. Offline coverage depends on the areas and zoom levels you have visited. Cache limit: 128 MB.", color = TextSecondary, modifier = Modifier.padding(vertical = 12.dp))
+        Text("Appearance", style = MaterialTheme.typography.titleMedium)
+        Text("Night instruments · high contrast", color = TextSecondary, modifier = Modifier.padding(vertical = 12.dp))
+        Text("About", style = MaterialTheme.typography.titleMedium)
+        Text("NAVIGATORS · Developed by Navigators", color = TextSecondary, modifier = Modifier.padding(vertical = 12.dp))
         Button(onClick = { navController.navigate("feedback_center") }, modifier = Modifier.fillMaxWidth()) { Text("Feedback & Support") }
         Spacer(Modifier.height(8.dp))
         Button(onClick = { navController.navigate("faq") }, modifier = Modifier.fillMaxWidth()) { Text("FAQ") }

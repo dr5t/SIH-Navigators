@@ -1,6 +1,7 @@
 package com.example.navigators.theme
 
 import android.app.Activity
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -16,11 +17,15 @@ private val DarkColorScheme = darkColorScheme(
     tertiary = StatusDR,
     background = BgBase,
     surface = BgSurface,
-    onPrimary = TextPrimary,
+    onPrimary = BgBase,
     onSecondary = TextPrimary,
     onTertiary = TextPrimary,
     onBackground = TextPrimary,
     onSurface = TextPrimary,
+    onSurfaceVariant = TextSecondary,
+    outline = BorderLight,
+    secondaryContainer = BgSurfaceElevated,
+    surfaceContainer = BgSurface,
     error = StatusError
 )
 
@@ -42,6 +47,12 @@ fun NavigatorsTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
+        shapes = androidx.compose.material3.Shapes(
+            extraSmall = androidx.compose.foundation.shape.RoundedCornerShape(4.dp),
+            small = androidx.compose.foundation.shape.RoundedCornerShape(6.dp),
+            medium = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+            large = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+        ),
         content = content
     )
 }

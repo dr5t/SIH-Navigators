@@ -50,13 +50,19 @@ class FieldTestService : Service() {
                 stopSelf()
             }
         }
-        return START_STICKY
+        return START_NOT_STICKY
+    }
+
+    override fun onDestroy() {
+        isRunning = false
+        currentSessionId = null
+        super.onDestroy()
     }
 
     private fun buildNotification(): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Navigators Field Test Active")
-            .setContentText("Recording telemetry in background (Session: ${currentSessionId?.takeLast(8)})")
+            .setContentTitle("NAVIGATORS · Navigation active")
+            .setContentText("Navigation and local recording continue in the background")
             .setSmallIcon(R.mipmap.ic_launcher)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)

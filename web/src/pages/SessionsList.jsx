@@ -1,56 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Calendar, ChevronRight } from 'lucide-react';
-
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
+import { API_BASE } from '../telemetry';
 export default function SessionsList() {
   const [sessions, setSessions] = useState([]);
-  const navigate = useNavigate();
-
+  const [status, setStatus] = useState('loading');
   useEffect(() => {
-    fetch('http://localhost:8000/sessions')
-      .then(res => res.json())
-      .then(data => setSessions(data))
-      .catch(err => console.error("Failed to load sessions", err));
+    const controller = new AbortController();
+    fetch(`${API_BASE}/sessions`, { signal: controller.signal }).then(res => { if (!res.ok) throw Error(); return res.json(); }).then(data => { if (!Array.isArray(data)) throw Error(); setSessions(data); setStatus('ready'); }).catch(e => { if (e.name !== 'AbortError') setStatus('error'); });
+    return () => controller.abort();
   }, []);
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
-      <header>
-        <h2>Field Test Sessions</h2>
-        <p style={{ color: 'var(--text-muted)' }}>Historical recordings from Android field tests.</p>
-      </header>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-        {sessions.map(session => (
-          <div 
-            key={session.id}
-            className="card" 
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between',
-              cursor: 'pointer'
-            }}
-            onClick={() => navigate(`/sessions/${session.id}`)}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ padding: '12px', background: 'var(--bg-surface-elevated)', borderRadius: '8px' }}>
-                <Calendar color="var(--brand-primary)" />
-              </div>
-              <div>
-                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.1rem' }}>{session.id}</h3>
-                <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                  Device: {session.device_id}
-                </p>
-              </div>
-            </div>
-            <ChevronRight color="var(--text-muted)" />
-          </div>
-        ))}
-        {sessions.length === 0 && (
-          <p style={{ color: 'var(--text-muted)' }}>No sessions recorded yet.</p>
-        )}
-      </div>
-    </div>
-  );
+  return <div><header className="page-heading"><div><span className="eyebrow">NAVIGATION LOG</span><h1>Trips</h1><p>Recorded device sessions and navigation events.</p></div><span className="eyebrow">{sessions.length} SESSIONS</span></header>
+  {sessions.map(session => <Link className="session-row" to={`/sessions/${session.id}`} key={session.id}><div><strong>{session.created_at ? new Date(session.created_at).toLocaleString() : session.id}</strong><span>Device {session.device_id} · {session.id}</span></div><ChevronRight size={18}/></Link>)}
+  {!sessions.length && <div className="empty-state"><h2>{status === 'loading' ? 'Loading trip log…' : status === 'error' ? 'Trip service unavailable' : 'No recorded trips'}</h2><p>{status === 'error' ? 'Connect to your navigation server to view uploaded sessions. Local trips remain on Android.' : 'Completed sessions will appear here when your device uploads its recordings.'}</p></div>}</div>;
 }
