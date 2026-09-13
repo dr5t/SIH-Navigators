@@ -1,12 +1,14 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Activity, ShieldCheck, Map, Smartphone, Server, Cpu } from 'lucide-react';
+import logoSrc from '../assets/logo.png';
 
 export default function Landing() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-8)' }}>
       {/* Hero Section */}
       <section style={{ textAlign: 'center', padding: 'var(--space-8) 0' }}>
+        <img src={logoSrc} alt="Navigators" style={{ width: 120, height: 120, borderRadius: '20px', objectFit: 'cover', marginBottom: 'var(--space-4)', filter: 'drop-shadow(0 4px 24px rgba(0,162,255,0.3))' }} />
         <h1 style={{ fontSize: '3.5rem', marginBottom: 'var(--space-4)', background: 'linear-gradient(45deg, var(--brand-primary), #4facfe)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           Navigators
         </h1>

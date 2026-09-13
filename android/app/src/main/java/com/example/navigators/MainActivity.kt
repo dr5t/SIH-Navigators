@@ -11,7 +11,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         
         // Initialize osmdroid configuration for caching and map rendering
-        Configuration.getInstance().load(applicationContext, androidx.preference.PreferenceManager.getDefaultSharedPreferences(applicationContext))
+        Configuration.getInstance().load(applicationContext, applicationContext.getSharedPreferences("osmdroid", android.content.Context.MODE_PRIVATE))
         
         setContent {
             NavigatorsTheme {

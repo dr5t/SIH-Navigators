@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
 import { Activity, Map, Radio, List, Settings, HelpCircle, FileText, LayoutDashboard } from 'lucide-react';
 import './styles.css';
+import logoSrc from './assets/logo.png';
 
 import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
@@ -33,7 +34,7 @@ const AppShell = ({ children }) => {
     <div className="app-shell">
       <nav className="sidebar">
         <div style={{ padding: 'var(--space-4)', fontWeight: 'bold', borderBottom: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Activity color="var(--brand-primary)" /> Navigators
+          <img src={logoSrc} alt="Navigators" style={{ width: 32, height: 32, borderRadius: '6px', objectFit: 'cover' }} /> Navigators
         </div>
         
         <div style={{ padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>

@@ -3,6 +3,7 @@ plugins {
   alias(libs.plugins.compose.compiler)
   alias(libs.plugins.kotlin.serialization)
   alias(libs.plugins.chaquopy)
+  id("com.google.devtools.ksp") version "2.3.12"
 }
 
 android {
@@ -61,9 +62,9 @@ kotlin {
 chaquopy {
     defaultConfig {
         version = "3.10"
+        buildPython("/opt/homebrew/bin/python3.10")
         pip {
             install("numpy")
-            install("torch")
         }
     }
 }
@@ -86,6 +87,7 @@ dependencies {
   implementation(libs.androidx.compose.ui)
   implementation(libs.androidx.compose.ui.tooling.preview)
   implementation(libs.androidx.compose.material3)
+  implementation("androidx.compose.material:material-icons-extended")
   // Tooling
   debugImplementation(libs.androidx.compose.ui.tooling)
   // Instrumented tests
@@ -111,17 +113,18 @@ dependencies {
   // Room Database
   val room_version = "2.6.1"
   implementation("androidx.room:room-runtime:$room_version")
-  annotationProcessor("androidx.room:room-compiler:$room_version")
-  // For Kotlin use kapt instead of annotationProcessor if using kapt plugin
-  // But ksp is preferred now. I will use KSP or KAPT. Wait, I should add the ksp plugin if I use Room.
-  // Actually, I can just include the runtime for now or mock the plugin. Since it's a python-focused agent, let's keep it simple.
+  implementation("androidx.room:room-ktx:$room_version")
+  ksp("androidx.room:room-compiler:$room_version")
   
   // WorkManager
   implementation("androidx.work:work-runtime-ktx:2.9.0")
-}
 
-  // Mapping
-  implementation("org.osmdroid:osmdroid-android:6.1.18")
-  
-  // Accompanist Permissions
-  implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+    // Mapping
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
+
+    // Accompanist Permissions
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+
+    // ONNX Runtime for AI Speed Inference
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.20.0")
+}

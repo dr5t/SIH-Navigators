@@ -37,12 +37,17 @@ fun SummaryScreen(navController: NavController) {
 
     LaunchedEffect(Unit) {
         scope.launch {
-            val db = TelemetryDatabase.getDatabase(context).telemetryDao()
-            // We just grab the latest session's points, or all points if session ID isn't strictly filtered for demo
-            val points = withContext(Dispatchers.IO) {
-                db.getOldest(10000) 
+            try {
+                val db = TelemetryDatabase.getDatabase(context).telemetryDao()
+                // We just grab the latest session's points, or all points if session ID isn't strictly filtered for demo
+                val points = withContext(Dispatchers.IO) {
+                    db.getOldest(10000) 
+                }
+                summary = SummaryGenerator.generateSummary(points)
+            } catch (e: Exception) {
+                android.util.Log.e("SummaryScreen", "Failed to load telemetry: ${e.message}")
+                summary = SummaryGenerator.generateSummary(emptyList())
             }
-            summary = SummaryGenerator.generateSummary(points)
             isLoading = false
         }
     }

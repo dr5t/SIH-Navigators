@@ -62,16 +62,24 @@ class NavigationViewModel(application: Application) : AndroidViewModel(applicati
         
         _uiState.update { it.copy(isRunning = true) }
         
-        // Start Sensors
-        sensorRecorder.start()
+        // Start Sensors — wrapped in try-catch for device compatibility
+        try {
+            sensorRecorder.start()
+        } catch (e: Exception) {
+            android.util.Log.e("NavigationVM", "Failed to start sensors: ${e.message}")
+        }
         
-        // Start GNSS
-        locationManager.requestLocationUpdates(
-            LocationManager.GPS_PROVIDER,
-            1000L,
-            0f,
-            this
-        )
+        // Start GNSS — wrapped in try-catch for device compatibility
+        try {
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                1000L,
+                0f,
+                this
+            )
+        } catch (e: Exception) {
+            android.util.Log.e("NavigationVM", "Failed to start GNSS: ${e.message}")
+        }
     }
 
     fun stopNavigation() {

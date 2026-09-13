@@ -52,19 +52,30 @@ class AISpeedEstimator:
 
     def _load_model(self):
         try:
-            import torch
-            if os.path.exists(self.model_path):
-                # Ensure no forward-compatibility warnings break loading in newer pythons
-                import warnings
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore")
-                    self.model = torch.jit.load(self.model_path)
-                self.model.eval()
-                self.is_available = True
-        except ImportError:
-            print("PyTorch not found. AI Speed Estimator unavailable (falling back to kinematics).")
+            if not os.path.exists(self.model_path):
+                print(f"Model path {self.model_path} does not exist.")
+                return
+
+            # Chaquopy Java Interop for ONNX Runtime
+            from java import jclass, jarray, jbyte
+            
+            OrtEnvironment = jclass("ai.onnxruntime.OrtEnvironment")
+            OrtSession = jclass("ai.onnxruntime.OrtSession")
+            
+            self.env = OrtEnvironment.getEnvironment()
+            
+            # Read file bytes directly for ONNX session
+            with open(self.model_path, "rb") as f:
+                model_bytes = f.read()
+                
+            # Convert bytes to Java byte array
+            j_bytes = jarray(jbyte)(model_bytes)
+            
+            self.model = self.env.createSession(j_bytes)
+            self.is_available = True
+            print(f"Loaded ONNX model {self.model_path} successfully via Chaquopy")
         except Exception as e:
-            print(f"Failed to load AI model from {self.model_path}: {e}")
+            print(f"Failed to load ONNX AI model from {self.model_path}: {e}")
 
     def normalize(self, imu_window: np.ndarray) -> np.ndarray:
         """Exact parity with ml/preprocessing/features.py normalize()"""
@@ -83,7 +94,10 @@ class AISpeedEstimator:
             return None, 0.0
             
         try:
-            import torch
+            from java import jclass, jarray, jfloat
+            import java.nio.FloatBuffer as FloatBuffer
+            
+            OnnxTensor = jclass("ai.onnxruntime.OnnxTensor")
             
             # 1. Combine
             if len(accel_window) != self.seq_len or len(gyro_window) != self.seq_len:
@@ -95,26 +109,57 @@ class AISpeedEstimator:
             norm_imu = self.normalize(imu_window)
             
             # 3. Shape for Model: (Batch, Channels, SeqLen) -> (1, 6, 200)
-            X = np.expand_dims(np.transpose(norm_imu, (1, 0)), axis=0)
-            tensor_X = torch.from_numpy(X).float()
+            X = np.expand_dims(np.transpose(norm_imu, (1, 0)), axis=0) # shape (1, 6, 200)
+            
+            # Flatten to 1D and create Java FloatBuffer for OnnxTensor
+            X_flat = X.flatten().astype(np.float32).tolist()
+            j_float_array = jarray(jfloat)(X_flat)
+            fb = FloatBuffer.wrap(j_float_array)
+            
+            shape = [1, 6, self.seq_len]
+            j_shape = jarray(jclass("java.lang.Long"))([jclass("java.lang.Long")(s) for s in shape])
             
             # 4. Inference
             start_time = time.time()
-            with torch.no_grad():
-                pred = self.model(tensor_X).numpy()[0, 0]
+            
+            tensor = OnnxTensor.createTensor(self.env, fb, j_shape)
+            
+            # Need Java HashMap for input
+            HashMap = jclass("java.util.HashMap")
+            inputs = HashMap()
+            
+            # Determine input name dynamically from session if needed, assuming "input"
+            input_name = "input"
+            try:
+                input_name = self.model.getInputNames().iterator().next()
+            except Exception:
+                pass
+                
+            inputs.put(input_name, tensor)
+            
+            results = self.model.run(inputs)
+            
+            # Assuming output is shape [1, 1]
+            # results is an OrtSession.Result. Get the first element
+            res = results.get(0).getValue() 
+            # In Java it's float[][], through Chaquopy it becomes a nested list or array
+            pred = float(res[0][0])
+            
+            results.close()
+            tensor.close()
+            
             self.last_inference_latency_ms = (time.time() - start_time) * 1000.0
             
             # 5. Quality/Confidence calculation (placeholder heuristic based on latency and sensible bounds)
-            # True confidence would require a probabilistic model (e.g. MC Dropout or NLL output).
             confidence = 1.0
             if pred < 0 or pred > 60: # Unrealistic speed
                 confidence = 0.1
                 pred = max(0.0, pred)
                 
-            return float(pred), confidence
+            return pred, confidence
             
         except Exception as e:
-            print(f"AI Speed Inference error: {e}")
+            print(f"AI Speed Inference error (ONNX): {e}")
             return None, 0.0
 
     def get_model_size_mb(self) -> float:

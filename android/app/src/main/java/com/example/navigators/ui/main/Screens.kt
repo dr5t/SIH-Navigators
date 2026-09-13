@@ -11,6 +11,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.navigators.theme.*
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
+import com.example.navigators.data.ProfileManager
+import com.example.navigators.data.VehicleProfile
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(navController: NavController) {
@@ -174,7 +179,6 @@ fun DashboardScreen(navController: NavController) {
     }
 }
 
-@Composable
 @OptIn(com.google.accompanist.permissions.ExperimentalPermissionsApi::class)
 @Composable
 fun NavigationScreen(
@@ -359,9 +363,7 @@ fun DiagnosticRow(name: String, status: String, isSuccess: Boolean) {
     }
 }
 
-import kotlinx.coroutines.launch
-import com.example.navigators.data.ProfileManager
-import com.example.navigators.data.VehicleProfile
+
 
 @Composable
 fun SettingsScreen(navController: NavController) {
@@ -463,9 +465,14 @@ fun SettingsScreen(navController: NavController) {
             var showClearDialog by remember { mutableStateOf(false) }
             
             LaunchedEffect(Unit) {
-                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                    val db = com.example.navigators.data.TelemetryDatabase.getDatabase(context)
-                    pendingCount = db.telemetryDao().count()
+                try {
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                        val db = com.example.navigators.data.TelemetryDatabase.getDatabase(context)
+                        pendingCount = db.telemetryDao().count()
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("SettingsScreen", "Failed to access TelemetryDatabase: ${e.message}")
+                    pendingCount = -1
                 }
             }
 
@@ -510,9 +517,13 @@ fun SettingsScreen(navController: NavController) {
                             Button(
                                 onClick = { 
                                     scope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                                        val db = com.example.navigators.data.TelemetryDatabase.getDatabase(context)
-                                        db.telemetryDao().clearAll()
-                                        pendingCount = 0
+                                        try {
+                                            val db = com.example.navigators.data.TelemetryDatabase.getDatabase(context)
+                                            db.telemetryDao().clearAll()
+                                            pendingCount = 0
+                                        } catch (e: Exception) {
+                                            android.util.Log.e("SettingsScreen", "Failed to clear DB: ${e.message}")
+                                        }
                                     }
                                     showClearDialog = false 
                                 },

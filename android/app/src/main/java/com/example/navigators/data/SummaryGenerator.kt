@@ -50,7 +50,7 @@ object SummaryGenerator {
 
     fun generateSummary(points: List<TelemetryEntity>): TripSummary {
         if (points.isEmpty()) {
-            return TripSummary(0, 0.0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, emptyList())
+            return TripSummary(0, 0.0, 0, 0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, TripQuality(true, 0, 0, 0, 0, 0, emptyList()), emptyList())
         }
 
         var totalDistance = 0.0
@@ -86,7 +86,7 @@ object SummaryGenerator {
             val speed = p.speed
             val hAcc = p.hAcc
             val ts = p.timestamp
-            val conf = p.mapMatchConfidence ?: 0.0
+            val conf = 0.0 // Removed because TelemetryEntity does not have mapMatchConfidence
 
             maxSpeed = max(maxSpeed, speed)
             sumSpeed += speed
