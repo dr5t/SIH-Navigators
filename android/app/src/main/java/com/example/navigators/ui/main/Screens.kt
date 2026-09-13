@@ -175,7 +175,86 @@ fun DashboardScreen(navController: NavController) {
 }
 
 @Composable
-fun NavigationScreen() {
+@OptIn(com.google.accompanist.permissions.ExperimentalPermissionsApi::class)
+@Composable
+fun NavigationScreen(
+    viewModel: NavigationViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    
+    val locationPermissionState = com.google.accompanist.permissions.rememberMultiplePermissionsState(
+        permissions = listOf(
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+    )
+
+    LaunchedEffect(Unit) {
+        if (!locationPermissionState.allPermissionsGranted) {
+            locationPermissionState.launchMultiplePermissionRequest()
+        } else {
+            viewModel.startNavigation()
+        }
+    }
+    
+    LaunchedEffect(locationPermissionState.allPermissionsGranted) {
+        if (locationPermissionState.allPermissionsGranted) {
+            viewModel.startNavigation()
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.stopNavigation()
+        }
+    }
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val mapView = remember {
+        org.osmdroid.views.MapView(context).apply {
+            setTileSource(org.osmdroid.tileprovider.tilesource.TileSourceFactory.MAPNIK)
+            setMultiTouchControls(true)
+            controller.setZoom(18.0)
+        }
+    }
+    
+    val vehicleMarker = remember {
+        org.osmdroid.views.overlay.Marker(mapView).apply {
+            setAnchor(org.osmdroid.views.overlay.Marker.ANCHOR_CENTER, org.osmdroid.views.overlay.Marker.ANCHOR_CENTER)
+            // Ideally use a custom arrow drawable here. For now we use the default and rotate it.
+        }
+    }
+    
+    val trajectoryLine = remember {
+        org.osmdroid.views.overlay.Polyline().apply {
+            outlinePaint.color = android.graphics.Color.BLUE
+            outlinePaint.strokeWidth = 10f
+        }
+    }
+
+    LaunchedEffect(uiState.lat, uiState.lon, uiState.isInitialized) {
+        if (uiState.isInitialized) {
+            val geoPoint = org.osmdroid.util.GeoPoint(uiState.lat, uiState.lon)
+            
+            // Only re-center if we haven't manually panned (simplified for now, always re-centers)
+            mapView.controller.animateTo(geoPoint)
+            
+            vehicleMarker.position = geoPoint
+            vehicleMarker.rotation = uiState.course.toFloat()
+            if (!mapView.overlays.contains(vehicleMarker)) {
+                mapView.overlays.add(vehicleMarker)
+            }
+            
+            val geoPoints = uiState.trajectory.map { org.osmdroid.util.GeoPoint(it.first, it.second) }
+            trajectoryLine.setPoints(geoPoints)
+            if (!mapView.overlays.contains(trajectoryLine)) {
+                mapView.overlays.add(0, trajectoryLine)
+            }
+            
+            mapView.invalidate()
+        }
+    }
+
     Column(Modifier.fillMaxSize()) {
         Column(Modifier.padding(16.dp)) {
             Text("Navigation", style = MaterialTheme.typography.titleLarge)
@@ -183,10 +262,16 @@ fun NavigationScreen() {
         }
         
         Box(Modifier.fillMaxSize().weight(1f)) {
-            // Placeholder for real map (e.g., osmdroid or Google Maps)
-            Surface(color = BgSurfaceElevated, modifier = Modifier.fillMaxSize()) {
-                Box(contentAlignment = androidx.compose.ui.Alignment.Center) {
-                    Text("Map Rendering Engine", color = TextSecondary)
+            if (locationPermissionState.allPermissionsGranted) {
+                androidx.compose.ui.viewinterop.AndroidView(
+                    factory = { mapView },
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Surface(color = BgSurfaceElevated, modifier = Modifier.fillMaxSize()) {
+                    Box(contentAlignment = androidx.compose.ui.Alignment.Center) {
+                        Text("Location Permission Required", color = TextSecondary)
+                    }
                 }
             }
             
@@ -199,13 +284,15 @@ fun NavigationScreen() {
                 Row(Modifier.padding(16.dp)) {
                     Column {
                         Text("Current Speed", color = TextMuted, style = MaterialTheme.typography.labelSmall)
-                        Text("45 km/h", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                        val speedKmh = String.format("%.1f", uiState.speed * 3.6)
+                        Text("$speedKmh km/h", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     }
                     Spacer(Modifier.width(24.dp))
                     Column {
-                        Text("Map Matching", color = TextMuted, style = MaterialTheme.typography.labelSmall)
-                        Text("Active (92%)", color = StatusSuccess, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text("Road: Main St", color = TextMuted, style = MaterialTheme.typography.bodySmall)
+                        Text("Navigation Mode", color = TextMuted, style = MaterialTheme.typography.labelSmall)
+                        Text(uiState.mode, color = StatusSuccess, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        val uncMeters = String.format("%.1f", uiState.posUncertainty)
+                        Text("Uncertainty: $uncMeters m", color = TextMuted, style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
