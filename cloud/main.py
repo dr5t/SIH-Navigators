@@ -1,11 +1,14 @@
 from fastapi import FastAPI, Depends, HTTPException, WebSocket, WebSocketDisconnect, Request
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any
 import time
-from .database import SessionLocal, SessionRecord, TelemetryBatch
-from .auth import verify_token, create_access_token
+from database import SessionLocal, SessionRecord, TelemetryBatch, VehicleProfile, ExperimentRecord
+from schemas import VehicleProfileCreate, VehicleProfileUpdate, VehicleProfileResponse, ExperimentRecord as ExperimentRecordSchema
+from auth import verify_token, create_access_token
 import json
 import math
+import uuid
 
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371000 # radius in meters
@@ -66,7 +69,7 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         active_connections.remove(websocket)
 
-from .schemas import TelemetryPoint
+from schemas import TelemetryPoint
 
 @app.post("/telemetry/batch")
 async def upload_telemetry_batch(session_id: str, batch: List[TelemetryPoint], db: Session = Depends(get_db), current_device: str = Depends(verify_token)):
@@ -113,6 +116,21 @@ async def upload_telemetry_batch(session_id: str, batch: List[TelemetryPoint], d
         db.rollback()
         # Log this securely in production
         raise HTTPException(status_code=500, detail="Database Error")
+
+@app.get("/sessions/{session_id}/export")
+def export_session(session_id: str, db: Session = Depends(get_db)):
+    from export import generate_export
+    try:
+        zip_buffer = generate_export(session_id, db)
+        return StreamingResponse(
+            zip_buffer, 
+            media_type="application/zip", 
+            headers={"Content-Disposition": f"attachment; filename=session_{session_id}_export.zip"}
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Export failed: {str(e)}")
 
 @app.get("/sessions")
 def get_sessions(db: Session = Depends(get_db)):
@@ -183,12 +201,24 @@ def get_session_summary(session_id: str, db: Session = Depends(get_db)):
     
     prev_point = None
     prev_mode = None
+    prev_map_matched = False
+    prev_low_confidence = False
+    
+    events.append({
+        "timestamp": start_time,
+        "type": "SESSION_STARTED",
+        "category": "System",
+        "severity": "INFO",
+        "description": "Session Started",
+        "measurements": None
+    })
     
     for p in all_points:
         mode = p.get("mode", "")
         speed = p.get("speed", 0.0)
-        hAcc = p.get("hAcc", 0.0)
+        hAcc = p.get("h_acc", p.get("hAcc", 0.0))
         ts = p.get("timestamp", 0)
+        conf = p.get("map_match_confidence", 0.0)
         
         max_speed = max(max_speed, speed)
         sum_speed += speed
@@ -202,15 +232,34 @@ def get_session_summary(session_id: str, db: Session = Depends(get_db)):
             dr_points_count += 1
             max_dr_uncertainty = max(max_dr_uncertainty, hAcc)
         
+        # Detailed Event Inference
         if prev_mode != mode:
             if "DEAD_RECKONING" in mode and prev_mode and "GNSS" in prev_mode:
                 outages += 1
-                events.append({"type": "GNSS_LOST", "timestamp": ts, "message": "GNSS Signal Lost - DR Started"})
+                events.append({"timestamp": ts, "type": "GNSS_LOST", "category": "GNSS", "severity": "ERROR", "description": "GNSS lost", "measurements": {"accuracy": f"{hAcc:.1f}m"}})
+                events.append({"timestamp": ts, "type": "DR_STARTED", "category": "DR", "severity": "WARNING", "description": "DR started", "measurements": {"speed": f"{speed:.1f}m/s"}})
             elif "GNSS" in mode and prev_mode and "DEAD_RECKONING" in prev_mode:
-                events.append({"type": "GNSS_RECOVERED", "timestamp": ts, "message": "GNSS Signal Recovered"})
-            elif "MAP_MATCH" in mode:
-                events.append({"type": "MAP_MATCHED", "timestamp": ts, "message": "Trajectory map-matched"})
+                events.append({"timestamp": ts, "type": "GNSS_RECOVERED", "category": "GNSS", "severity": "SUCCESS", "description": "GNSS recovered", "measurements": {"accuracy": f"{hAcc:.1f}m"}})
+                # Fusion typically integrates the recovered GNSS signal
+                events.append({"timestamp": ts + 3000, "type": "FUSION_COMPLETED", "category": "Fusion", "severity": "SUCCESS", "description": "Fusion completed", "measurements": None})
+            elif "GNSS_DEGRADED" in mode and prev_mode and "GNSS_GOOD" in prev_mode:
+                events.append({"timestamp": ts, "type": "GNSS_DEGRADED", "category": "GNSS", "severity": "WARNING", "description": "GNSS degraded", "measurements": {"accuracy": f"{hAcc:.1f}m"}})
+            elif "GNSS_GOOD" in mode and (prev_mode == "INITIALIZING" or prev_mode is None):
+                events.append({"timestamp": ts, "type": "GNSS_ACQUIRED", "category": "GNSS", "severity": "SUCCESS", "description": "GNSS acquired", "measurements": {"accuracy": f"{hAcc:.1f}m"}})
+            
             prev_mode = mode
+            
+        # Map Matching Events
+        is_map_matched = (conf is not None and conf > 0.3)
+        if is_map_matched and not prev_map_matched:
+            events.append({"timestamp": ts, "type": "MAP_MATCHED", "category": "Map", "severity": "INFO", "description": "Map matched", "measurements": {"confidence": f"{conf:.2f}"}})
+        prev_map_matched = is_map_matched
+        
+        # Low Confidence Events
+        is_low_confidence = hAcc > 20.0 or ("DEGRADED" in mode and "DEAD_RECKONING" in mode)
+        if is_low_confidence and not prev_low_confidence:
+            events.append({"timestamp": ts, "type": "LOW_CONFIDENCE", "category": "Errors", "severity": "WARNING", "description": "Low confidence", "measurements": {"accuracy": f"{hAcc:.1f}m"}})
+        prev_low_confidence = is_low_confidence
             
         if prev_point:
             dt = max(0, (ts - prev_point.get("timestamp", 0)) / 1000)
@@ -226,9 +275,16 @@ def get_session_summary(session_id: str, db: Session = Depends(get_db)):
                 
         prev_point = p
         
-    events.insert(0, {"type": "SESSION_STARTED", "timestamp": start_time, "message": "Session Started"})
-    events.append({"type": "SESSION_ENDED", "timestamp": end_time, "message": "Session Ended"})
+    events.append({
+        "timestamp": end_time,
+        "type": "SESSION_ENDED",
+        "category": "System",
+        "severity": "INFO",
+        "description": "Session Ended",
+        "measurements": None
+    })
         
+    events.sort(key=lambda e: e.get("timestamp", 0))
     n = len(all_points)
     
     score_unavailable = False
@@ -333,38 +389,76 @@ def get_latest_model():
         "checksum": "abc123def456"
     }
 
-from .schemas import ExperimentRecord
 import uuid
 
-# In-memory store for experiments for demo purposes
-experiments_db: Dict[str, ExperimentRecord] = {}
-
 @app.post("/experiments")
-def create_experiment(exp: ExperimentRecord):
-    experiments_db[exp.id] = exp
+def create_experiment(exp: ExperimentRecordSchema, db: Session = Depends(get_db)):
+    db_exp = ExperimentRecord(
+        id=exp.id,
+        timestamp=exp.timestamp,
+        device=exp.device,
+        session_id=exp.session_id,
+        model_version=exp.model_version,
+        map_version=exp.map_version,
+        configuration=exp.configuration,
+        outage_scenario=exp.outage_scenario,
+        results=exp.results.dict()
+    )
+    db.add(db_exp)
+    db.commit()
     return {"status": "ok", "id": exp.id}
 
 @app.get("/experiments")
-def list_experiments():
-    return list(experiments_db.values())
+def list_experiments(db: Session = Depends(get_db)):
+    exps = db.query(ExperimentRecord).order_by(ExperimentRecord.timestamp.desc()).all()
+    # Format the results column properly since it might be serialized as string depending on DB driver
+    out = []
+    for exp in exps:
+        r = exp.results
+        if isinstance(r, str):
+            r = json.loads(r)
+        out.append({
+            "id": exp.id,
+            "session_id": exp.session_id,
+            "configuration": exp.configuration,
+            "results": r,
+            "timestamp": exp.timestamp
+        })
+    return out
+
+@app.post("/sessions/{session_id}/replay")
+def run_replay(session_id: str, payload: dict, db: Session = Depends(get_db)):
+    config = payload.get("configuration", "INS")
+    from replay import run_experiment
+    try:
+        return run_experiment(session_id, config, db)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/experiments/compare")
-def compare_experiments():
-    return [
-        {"configuration": "INS", "position_error": 12.4, "drift": 4.5},
-        {"configuration": "INS + AI", "position_error": 8.2, "drift": 2.1},
-        {"configuration": "INS + AI + Map", "position_error": 4.1, "drift": 0.4},
-        {"configuration": "Full system", "position_error": 3.2, "drift": 0.2}
-    ]
+def compare_experiments(exp_a: str, exp_b: str, db: Session = Depends(get_db)):
+    # Compares two experiments from DB
+    a = db.query(ExperimentRecord).filter(ExperimentRecord.id == exp_a).first()
+    b = db.query(ExperimentRecord).filter(ExperimentRecord.id == exp_b).first()
+    if not a or not b:
+        raise HTTPException(status_code=404, detail="Experiment not found")
+        
+    ra = a.results if not isinstance(a.results, str) else json.loads(a.results)
+    rb = b.results if not isinstance(b.results, str) else json.loads(b.results)
+    
+    return {
+        "experiment_a": {"id": a.id, "configuration": a.configuration, "results": ra},
+        "experiment_b": {"id": b.id, "configuration": b.configuration, "results": rb}
+    }
 
 @app.get("/experiments/{exp_id}/export")
-def export_experiment(exp_id: str):
-    if exp_id not in experiments_db:
+def export_experiment(exp_id: str, db: Session = Depends(get_db)):
+    exp = db.query(ExperimentRecord).filter(ExperimentRecord.id == exp_id).first()
+    if not exp:
         raise HTTPException(status_code=404, detail="Experiment not found")
     
     # In a real app, this would generate and return a ZIP file containing CSVs and JSONs.
     # For this mock API, we return a structured JSON document representing the export.
-    exp = experiments_db[exp_id]
     return {
         "experiment_id": exp.id,
         "metadata": {
@@ -375,11 +469,70 @@ def export_experiment(exp_id: str):
             "configuration": exp.configuration,
             "outage_scenario": exp.outage_scenario
         },
-        "results": exp.results.dict(),
+        "results": exp.results if not isinstance(exp.results, str) else json.loads(exp.results),
         "trajectory_data_url": f"https://storage.example.com/exports/{exp.id}/trajectory.csv",
         "raw_sensor_data_url": f"https://storage.example.com/exports/{exp.id}/sensors.csv",
         "diagnostic_report": "All systems nominal during test."
     }
+
+# Profiles Endpoints
+
+@app.get("/profiles", response_model=List[VehicleProfileResponse])
+def get_profiles(device_id: str = Depends(verify_token), db: Session = Depends(get_db)):
+    return db.query(VehicleProfile).filter(VehicleProfile.device_id == device_id).all()
+
+@app.post("/profiles", response_model=VehicleProfileResponse)
+def create_profile(profile: VehicleProfileCreate, device_id: str = Depends(verify_token), db: Session = Depends(get_db)):
+    profile_id = str(uuid.uuid4())
+    db_profile = VehicleProfile(
+        id=profile_id,
+        device_id=device_id,
+        name=profile.name,
+        vehicle_type=profile.vehicle_type,
+        phone_mounting=profile.phone_mounting,
+        external_imu=1 if profile.external_imu else 0,
+        nav_prefs=profile.nav_prefs
+    )
+    db.add(db_profile)
+    db.commit()
+    db.refresh(db_profile)
+    # Convert integer boolean back for Pydantic response
+    db_profile.is_calibrated = bool(db_profile.is_calibrated)
+    db_profile.external_imu = bool(db_profile.external_imu)
+    return db_profile
+
+@app.put("/profiles/{profile_id}", response_model=VehicleProfileResponse)
+def update_profile(profile_id: str, profile_update: VehicleProfileUpdate, device_id: str = Depends(verify_token), db: Session = Depends(get_db)):
+    db_profile = db.query(VehicleProfile).filter(VehicleProfile.id == profile_id, VehicleProfile.device_id == device_id).first()
+    if not db_profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+        
+    update_data = profile_update.dict(exclude_unset=True)
+    if 'is_calibrated' in update_data:
+        update_data['is_calibrated'] = 1 if update_data['is_calibrated'] else 0
+    if 'external_imu' in update_data:
+        update_data['external_imu'] = 1 if update_data['external_imu'] else 0
+        
+    for key, value in update_data.items():
+        setattr(db_profile, key, value)
+        
+    db.commit()
+    db.refresh(db_profile)
+    
+    db_profile.is_calibrated = bool(db_profile.is_calibrated)
+    db_profile.external_imu = bool(db_profile.external_imu)
+    return db_profile
+
+@app.delete("/profiles/{profile_id}")
+def delete_profile(profile_id: str, device_id: str = Depends(verify_token), db: Session = Depends(get_db)):
+    db_profile = db.query(VehicleProfile).filter(VehicleProfile.id == profile_id, VehicleProfile.device_id == device_id).first()
+    if not db_profile:
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    db.delete(db_profile)
+    db.commit()
+    return {"status": "deleted"}
+
 
 if __name__ == "__main__":
     import uvicorn

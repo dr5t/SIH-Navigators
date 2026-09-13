@@ -13,6 +13,8 @@ import Demo from './pages/Demo';
 import SystemHealth from './pages/SystemHealth';
 import ExperimentManager from './pages/ExperimentManager';
 import DeviceCompatibility from './pages/DeviceCompatibility';
+import Profiles from './pages/Profiles';
+import Lab from './pages/Lab';
 
 const History = () => <div className="card"><h2>History</h2><p>Diagnostic history.</p></div>;
 const SettingsPage = () => <div className="card"><h2>Settings</h2><p>App configuration.</p></div>;
@@ -43,6 +45,12 @@ const AppShell = ({ children }) => {
           </NavLink>
           <NavLink to="/demo" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
             <FileText size={18} style={{marginRight: '8px'}}/> One-Click Demo
+          </NavLink>
+          <NavLink to="/profiles" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
+            <Settings size={18} style={{marginRight: '8px'}}/> Profiles
+          </NavLink>
+          <NavLink to="/lab" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
+            <Activity size={18} style={{marginRight: '8px'}}/> Navigation Lab
           </NavLink>
           <NavLink to="/experiments" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
             <List size={18} style={{marginRight: '8px'}}/> Experiments
@@ -92,6 +100,8 @@ export default function App() {
           <Route path="/compatibility" element={<DeviceCompatibility />} />
           <Route path="/diagnostics" element={<Diagnostics />} />
           <Route path="/experiments" element={<ExperimentManager />} />
+          <Route path="/profiles" element={<Profiles />} />
+          <Route path="/lab" element={<Lab />} />
           <Route path="/sessions" element={<SessionsList />} />
           <Route path="/sessions/:id" element={<SessionReport />} />
           <Route path="/benchmark" element={<Benchmark />} />

@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
+from datetime import datetime
 
 class TelemetryPoint(BaseModel):
     timestamp: float = Field(..., description="UNIX timestamp of the measurement")
@@ -36,3 +37,35 @@ class ExperimentRecord(BaseModel):
     configuration: str
     outage_scenario: str
     results: ExperimentResults
+
+class VehicleProfileBase(BaseModel):
+    name: str
+    vehicle_type: str
+    phone_mounting: str
+    external_imu: bool = False
+    nav_prefs: Optional[dict] = None
+
+class VehicleProfileCreate(VehicleProfileBase):
+    pass
+
+class VehicleProfileUpdate(BaseModel):
+    name: Optional[str] = None
+    vehicle_type: Optional[str] = None
+    phone_mounting: Optional[str] = None
+    external_imu: Optional[bool] = None
+    is_calibrated: Optional[bool] = None
+    alignment_params: Optional[dict] = None
+    calibration_params: Optional[dict] = None
+    nav_prefs: Optional[dict] = None
+
+class VehicleProfileResponse(VehicleProfileBase):
+    id: str
+    device_id: str
+    is_calibrated: bool
+    alignment_params: Optional[dict] = None
+    calibration_params: Optional[dict] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True

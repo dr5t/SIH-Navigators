@@ -45,6 +45,31 @@ class NavigationEngine:
         
         self.current_time = 0.0
         self.last_state = self._build_state()
+        self.active_profile = None
+        
+        # Configuration Toggles for Navigation Lab Replay
+        self.enable_nhc = True
+        self.enable_ai = True
+        self.enable_map_match = True
+
+    def configure_features(self, nhc: bool = True, ai: bool = True, map_match: bool = True):
+        self.enable_nhc = nhc
+        self.enable_ai = ai
+        self.enable_map_match = map_match
+
+    def load_calibration(self, is_calibrated: bool, alignment_params: Dict[str, Any] = None):
+        """
+        Loads the calibration and alignment configuration from the active profile.
+        """
+        self.alignment.is_calibrated = is_calibrated
+        self.active_profile = {
+            "is_calibrated": is_calibrated,
+            "alignment_params": alignment_params
+        }
+        if alignment_params and 'q_vehicle_to_nav' in alignment_params:
+            q = alignment_params['q_vehicle_to_nav']
+            from navigation_core.ins.quaternion import Quaternion
+            self.alignment.q_vehicle_to_nav = Quaternion(q)
 
     def process_imu(self, accel: np.ndarray, gyro: np.ndarray, dt: float, timestamp: float) -> Dict[str, Any]:
         """
@@ -66,7 +91,7 @@ class NavigationEngine:
         self.state_machine.process_imu(timestamp)
         
         # Non-Holonomic Constraints update if in DR
-        if self.state_machine.mode in [NavigationMode.DEAD_RECKONING, NavigationMode.DEAD_RECKONING_DEGRADED]:
+        if self.enable_nhc and self.state_machine.mode in [NavigationMode.DEAD_RECKONING, NavigationMode.DEAD_RECKONING_DEGRADED]:
             v_nav = self.eskf.ins.vel
             q = self.eskf.ins.q
             innovation, H, R = self.nhc.generate_virtual_measurements(v_nav, q)
@@ -140,5 +165,6 @@ class NavigationEngine:
             "speed": s.speed_m_s,
             "course": np.degrees(np.arctan2(s.velocity_east, s.velocity_north)),
             "mode": s.mode.name,
-            "pos_uncertainty": s.pos_uncertainty
+            "pos_uncertainty": s.pos_uncertainty,
+            "explanation": s.get_confidence_explanation()
         }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Activity, Navigation, MapPin, AlertTriangle, CheckCircle, Clock, Star } from 'lucide-react';
+import { ArrowLeft, Activity, Navigation, MapPin, AlertTriangle, CheckCircle, Clock, Star, Download, ShieldAlert, X } from 'lucide-react';
 import { MapContainer, TileLayer, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -9,6 +9,10 @@ export default function SessionReport() {
   const navigate = useNavigate();
   const [report, setReport] = useState(null);
   const [summary, setSummary] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  
+  const categories = ['All', 'GNSS', 'DR', 'AI', 'Sensors', 'Map', 'Fusion', 'Errors'];
 
   useEffect(() => {
     // Fetch raw telemetry
@@ -25,6 +29,11 @@ export default function SessionReport() {
   }, [id]);
 
   if (!report || !summary) return <div style={{ padding: '24px' }}>Loading report...</div>;
+
+  const triggerExport = () => {
+    window.location.href = `http://localhost:8000/sessions/${id}/export`;
+    setIsExportModalOpen(false);
+  };
 
   const getPolylineColor = (mode) => {
     if (mode.includes('DEAD_RECKONING')) return 'var(--status-dr)';
@@ -56,18 +65,57 @@ export default function SessionReport() {
     : [0, 0];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
-      <header style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <button 
-          onClick={() => navigate('/sessions')}
-          style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)' }}
-        >
-          <ArrowLeft />
-        </button>
-        <div>
-          <h2 style={{ margin: 0 }}>Smart Trip Summary</h2>
-          <p style={{ margin: 0, color: 'var(--text-muted)' }}>Session: {id}</p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)', position: 'relative' }}>
+      
+      {/* Export Modal */}
+      {isExportModalOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div className="card" style={{ maxWidth: '500px', width: '100%', position: 'relative' }}>
+            <button onClick={() => setIsExportModalOpen(false)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              <X size={20} />
+            </button>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--brand-primary)' }}>
+              <ShieldAlert size={24} /> Export Session Data
+            </h3>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '16px' }}>
+              You are about to export raw telemetry and logs for this session.
+            </p>
+            <ul style={{ marginBottom: '24px', paddingLeft: '20px', color: 'var(--text-primary)', lineHeight: '1.6' }}>
+              <li><strong>Included:</strong> Trajectory, raw GNSS, AI Speed limits, events, diagnostics, and configurations.</li>
+              <li><strong>Privacy:</strong> This export contains exact location coordinates and timestamps. Be careful when sharing this file publicly.</li>
+              <li><strong>Format:</strong> A ZIP archive containing structured CSVs and JSONs.</li>
+            </ul>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+              <button className="btn-secondary" onClick={() => setIsExportModalOpen(false)}>Cancel</button>
+              <button className="btn-primary" onClick={triggerExport} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Download size={16} /> Accept & Download
+              </button>
+            </div>
+          </div>
         </div>
+      )}
+
+      <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button 
+            onClick={() => navigate('/sessions')}
+            style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-primary)' }}
+          >
+            <ArrowLeft />
+          </button>
+          <div>
+            <h2 style={{ margin: 0 }}>Smart Trip Summary</h2>
+            <p style={{ margin: 0, color: 'var(--text-muted)' }}>Session: {id}</p>
+          </div>
+        </div>
+        
+        <button className="btn-secondary" onClick={() => setIsExportModalOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Download size={16} /> Export Data
+        </button>
       </header>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--space-4)' }}>
@@ -215,25 +263,57 @@ export default function SessionReport() {
         </div>
 
         <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-          <h4 style={{ margin: '0 0 16px 0' }}>Key Events</h4>
+          <h4 style={{ margin: '0 0 16px 0' }}>Navigation Event Timeline</h4>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+            {categories.map(c => (
+              <button 
+                key={c}
+                onClick={() => setSelectedCategory(c)}
+                style={{
+                  padding: '4px 12px',
+                  borderRadius: '16px',
+                  border: '1px solid var(--border-light)',
+                  background: selectedCategory === c ? 'var(--brand-primary)' : 'transparent',
+                  color: selectedCategory === c ? 'white' : 'var(--text-primary)',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem'
+                }}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
           <div style={{ overflowY: 'auto', flex: 1 }}>
-            {summary.events?.map((e, idx) => (
-              <div key={idx} style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-                <div style={{ 
-                  width: '10px', height: '10px', borderRadius: '50%', marginTop: '6px',
-                  background: e.type.includes('LOST') ? 'var(--status-dr)' : 
-                              e.type.includes('RECOVERED') ? 'var(--status-success)' : 'var(--brand-primary)'
-                }} />
-                <div>
-                  <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{e.message}</div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                    {new Date(e.timestamp).toLocaleTimeString()}
+            {summary.events?.filter(e => selectedCategory === 'All' || e.category === selectedCategory).map((e, idx) => {
+              let color = 'var(--brand-primary)';
+              if (e.severity === 'ERROR') color = 'var(--status-error)';
+              if (e.severity === 'WARNING') color = 'var(--status-warning)';
+              if (e.severity === 'SUCCESS') color = 'var(--status-success)';
+              
+              return (
+                <div key={idx} style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{ 
+                    width: '10px', height: '10px', borderRadius: '50%', marginTop: '6px',
+                    background: color
+                  }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{e.description}</span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                        {new Date(e.timestamp).toLocaleTimeString()}
+                      </span>
+                    </div>
+                    {e.measurements && Object.entries(e.measurements).map(([k, v]) => (
+                      <div key={k} style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                        {k}: {v}
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
-            ))}
-            {(!summary.events || summary.events.length === 0) && (
-              <div style={{ color: 'var(--text-muted)' }}>No notable events recorded.</div>
+              );
+            })}
+            {(!summary.events || summary.events.filter(e => selectedCategory === 'All' || e.category === selectedCategory).length === 0) && (
+              <div style={{ color: 'var(--text-muted)' }}>No events to display.</div>
             )}
           </div>
         </div>

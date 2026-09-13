@@ -203,6 +203,7 @@ class NavigationEngine:
             "course": np.degrees(np.arctan2(s.velocity_east, s.velocity_north)),
             "mode": s.mode.name,
             "pos_uncertainty": s.pos_uncertainty,
+            "explanation": s.get_confidence_explanation(),
             "map_status": s.map_status,
             "map_matched_lat": s.map_matched_lat,
             "map_matched_lon": s.map_matched_lon,

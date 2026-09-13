@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.navigators.theme.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(navController: NavController) {
     Column(Modifier.padding(16.dp).fillMaxSize()) {
@@ -19,6 +20,14 @@ fun DashboardScreen(navController: NavController) {
         
         Spacer(Modifier.height(24.dp))
         
+        var showExplanation by remember { mutableStateOf(false) }
+        val mockExplanation = mapOf(
+            "confidence" to "LOW",
+            "reasons" to listOf("GNSS unavailable or rejected", "Position uncertainty increased to 31 m"),
+            "mitigations" to listOf("AI speed active", "Vehicle constraints active"),
+            "actions" to listOf("Run Diagnostics", "Check GNSS", "Recalibrate")
+        )
+
         Card(
             modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
             colors = CardDefaults.cardColors(containerColor = BgSurfaceElevated)
@@ -26,8 +35,41 @@ fun DashboardScreen(navController: NavController) {
             Column(Modifier.padding(16.dp)) {
                 Text("Navigation Status", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                 Spacer(Modifier.height(8.dp))
-                Surface(color = StatusSuccess.copy(alpha = 0.2f), shape = MaterialTheme.shapes.small) {
-                    Text("GNSS + INS", color = StatusSuccess, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                Surface(
+                    onClick = { showExplanation = true },
+                    color = StatusError.copy(alpha = 0.2f), 
+                    shape = MaterialTheme.shapes.small
+                ) {
+                    Text("Confidence: LOW", color = StatusError, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                }
+            }
+        }
+
+        if (showExplanation) {
+            ModalBottomSheet(onDismissRequest = { showExplanation = false }) {
+                Column(Modifier.padding(16.dp).padding(bottom = 32.dp)) {
+                    Text("Navigation Status", style = MaterialTheme.typography.titleLarge)
+                    Text("Confidence: ${mockExplanation["confidence"]}", color = StatusError, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 16.dp))
+                    
+                    Text("Reasons:", fontWeight = FontWeight.SemiBold)
+                    (mockExplanation["reasons"] as List<String>).forEach {
+                        Text("• $it", color = TextSecondary, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
+                    }
+                    
+                    Spacer(Modifier.height(16.dp))
+                    Text("Current Mitigation:", fontWeight = FontWeight.SemiBold)
+                    (mockExplanation["mitigations"] as List<String>).forEach {
+                        Text("✓ $it", color = StatusSuccess, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
+                    }
+                    
+                    Spacer(Modifier.height(24.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        (mockExplanation["actions"] as List<String>).forEach { action ->
+                            Button(onClick = { showExplanation = false }, modifier = Modifier.weight(1f)) {
+                                Text(action)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -62,9 +104,31 @@ fun DashboardScreen(navController: NavController) {
         // Field Test Controls
         var isTesting by remember { mutableStateOf(false) }
         val context = androidx.compose.ui.platform.LocalContext.current
+        var showCalibrationWarning by remember { mutableStateOf(false) }
+        
+        if (showCalibrationWarning) {
+            AlertDialog(
+                onDismissRequest = { showCalibrationWarning = false },
+                title = { Text("Calibration Required") },
+                text = { Text("The currently selected vehicle profile is not calibrated or missing. Please calibrate your device first or select a calibrated profile before starting navigation.") },
+                confirmButton = {
+                    Button(onClick = { showCalibrationWarning = false }) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
         
         Button(
             onClick = {
+                val profileManager = com.example.navigators.data.ProfileManager(context)
+                val activeProfileId = profileManager.getActiveProfileId()
+                
+                if (!isTesting && (activeProfileId == null || !profileManager.isProfileCalibrated(activeProfileId))) {
+                    showCalibrationWarning = true
+                    return@Button
+                }
+
                 val intent = android.content.Intent(context, Class.forName("com.example.navigators.FieldTestService"))
                 if (isTesting) {
                     intent.action = "com.example.navigators.STOP_FIELD_TEST"
@@ -194,6 +258,8 @@ fun DiagnosticRow(name: String, status: String, isSuccess: Boolean) {
 }
 
 import kotlinx.coroutines.launch
+import com.example.navigators.data.ProfileManager
+import com.example.navigators.data.VehicleProfile
 
 @Composable
 fun SettingsScreen(navController: NavController) {
@@ -201,8 +267,55 @@ fun SettingsScreen(navController: NavController) {
     var isUpdating by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     
+    val profileManager = remember { ProfileManager(context) }
+    var profiles by remember { mutableStateOf<List<VehicleProfile>>(emptyList()) }
+    var activeProfileId by remember { mutableStateOf(profileManager.getActiveProfileId()) }
+    var isLoadingProfiles by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        profiles = profileManager.fetchProfiles()
+        isLoadingProfiles = false
+    }
+    
     Column(Modifier.padding(16.dp)) {
         Text("Settings", style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.height(16.dp))
+        
+        Text("Vehicle & Sensor Profiles", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            colors = CardDefaults.cardColors(containerColor = BgSurfaceElevated)
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                if (isLoadingProfiles) {
+                    Text("Loading profiles...")
+                } else if (profiles.isEmpty()) {
+                    Text("No profiles found. Create one in the Web Dashboard.")
+                } else {
+                    profiles.forEach { profile ->
+                        Row(
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                        ) {
+                            RadioButton(
+                                selected = (profile.id == activeProfileId),
+                                onClick = { 
+                                    activeProfileId = profile.id
+                                    profileManager.setActiveProfileId(profile.id)
+                                    profileManager.setProfileCalibrated(profile.id, profile.isCalibrated)
+                                }
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column {
+                                Text(profile.name, fontWeight = FontWeight.Medium)
+                                Text("${profile.vehicleType} • ${if(profile.isCalibrated) "Calibrated" else "Uncalibrated"}", style = MaterialTheme.typography.bodySmall, color = TextMuted)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         Spacer(Modifier.height(16.dp))
         
         Text("AI Navigation Models", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)

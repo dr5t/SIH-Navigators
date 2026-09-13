@@ -32,6 +32,8 @@ fun SummaryScreen(navController: NavController) {
     val scope = rememberCoroutineScope()
     var summary by remember { mutableStateOf<TripSummary?>(null) }
     var isLoading by remember { mutableStateOf(true) }
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
+    val categories = listOf("GNSS", "DR", "AI", "Sensors", "Map", "Fusion", "Errors")
 
     LaunchedEffect(Unit) {
         scope.launch {
@@ -144,13 +146,36 @@ fun SummaryScreen(navController: NavController) {
                 }
 
                 item {
-                    Text("Key Events", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Column {
+                        Text("Navigation Event Timeline", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                        Spacer(Modifier.height(8.dp))
+                        androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            item {
+                                FilterChip(
+                                    selected = selectedCategory == null,
+                                    onClick = { selectedCategory = null },
+                                    label = { Text("All") }
+                                )
+                            }
+                            items(categories) { cat ->
+                                FilterChip(
+                                    selected = selectedCategory == cat,
+                                    onClick = { selectedCategory = cat },
+                                    label = { Text(cat) }
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
+                    }
                 }
 
-                items(summary!!.events) { event ->
-                    val color = when {
-                        event.type.contains("LOST") -> StatusWarning
-                        event.type.contains("RECOVERED") -> StatusSuccess
+                val filteredEvents = summary!!.events.filter { selectedCategory == null || it.category == selectedCategory }
+                
+                items(filteredEvents) { event ->
+                    val color = when (event.severity) {
+                        "ERROR" -> MaterialTheme.colorScheme.error
+                        "WARNING" -> StatusWarning
+                        "SUCCESS" -> StatusSuccess
                         else -> BrandPrimary
                     }
                     val time = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(event.timestamp))
@@ -158,8 +183,13 @@ fun SummaryScreen(navController: NavController) {
                     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.Top) {
                         Box(Modifier.padding(top = 6.dp, end = 12.dp).size(10.dp).background(color, CircleShape))
                         Column {
-                            Text(event.message, fontWeight = FontWeight.Medium)
-                            Text(time, style = MaterialTheme.typography.bodySmall, color = TextMuted)
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(event.description, fontWeight = FontWeight.Medium)
+                                Text(time, style = MaterialTheme.typography.bodySmall, color = TextMuted)
+                            }
+                            event.measurements?.forEach { (k, v) ->
+                                Text("$k: $v", style = MaterialTheme.typography.bodySmall, color = TextMuted)
+                            }
                         }
                     }
                 }

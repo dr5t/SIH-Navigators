@@ -29,8 +29,11 @@ data class TripQuality(
 
 data class TripEvent(
     val type: String,
+    val category: String,
     val timestamp: Long,
-    val message: String
+    val severity: String,
+    val description: String,
+    val measurements: Map<String, String>? = null
 )
 
 object SummaryGenerator {
@@ -71,16 +74,19 @@ object SummaryGenerator {
         val endTime = points.last().timestamp
         val duration = max(0L, (endTime - startTime) / 1000)
 
-        events.add(TripEvent("SESSION_STARTED", startTime, "Session Started"))
+        events.add(TripEvent("SESSION_STARTED", "System", startTime, "INFO", "Session Started"))
 
         var prevPoint: TelemetryEntity? = null
         var prevMode: String? = null
+        var prevMapMatched = false
+        var prevLowConfidence = false
 
         for (p in points) {
             val mode = p.mode
             val speed = p.speed
             val hAcc = p.hAcc
             val ts = p.timestamp
+            val conf = p.mapMatchConfidence ?: 0.0
 
             maxSpeed = max(maxSpeed, speed)
             sumSpeed += speed
@@ -98,14 +104,30 @@ object SummaryGenerator {
             if (prevMode != mode) {
                 if (mode.contains("DEAD_RECKONING") && prevMode?.contains("GNSS") == true) {
                     outages++
-                    events.add(TripEvent("GNSS_LOST", ts, "GNSS Signal Lost - DR Started"))
+                    events.add(TripEvent("GNSS_LOST", "GNSS", ts, "ERROR", "GNSS lost", mapOf("accuracy" to String.format("%.1fm", hAcc))))
+                    events.add(TripEvent("DR_STARTED", "DR", ts, "WARNING", "DR started", mapOf("speed" to String.format("%.1fm/s", speed))))
                 } else if (mode.contains("GNSS") && prevMode?.contains("DEAD_RECKONING") == true) {
-                    events.add(TripEvent("GNSS_RECOVERED", ts, "GNSS Signal Recovered"))
-                } else if (mode.contains("MAP_MATCH")) {
-                    events.add(TripEvent("MAP_MATCHED", ts, "Trajectory map-matched"))
+                    events.add(TripEvent("GNSS_RECOVERED", "GNSS", ts, "SUCCESS", "GNSS recovered", mapOf("accuracy" to String.format("%.1fm", hAcc))))
+                    events.add(TripEvent("FUSION_COMPLETED", "Fusion", ts + 3000, "SUCCESS", "Fusion completed"))
+                } else if (mode.contains("GNSS_DEGRADED") && prevMode?.contains("GNSS_GOOD") == true) {
+                    events.add(TripEvent("GNSS_DEGRADED", "GNSS", ts, "WARNING", "GNSS degraded", mapOf("accuracy" to String.format("%.1fm", hAcc))))
+                } else if (mode.contains("GNSS_GOOD") && (prevMode == "INITIALIZING" || prevMode == null)) {
+                    events.add(TripEvent("GNSS_ACQUIRED", "GNSS", ts, "SUCCESS", "GNSS acquired", mapOf("accuracy" to String.format("%.1fm", hAcc))))
                 }
                 prevMode = mode
             }
+
+            val isMapMatched = conf > 0.3
+            if (isMapMatched && !prevMapMatched) {
+                events.add(TripEvent("MAP_MATCHED", "Map", ts, "INFO", "Map matched", mapOf("confidence" to String.format("%.2f", conf))))
+            }
+            prevMapMatched = isMapMatched
+
+            val isLowConfidence = hAcc > 20.0 || (mode.contains("DEGRADED") && mode.contains("DEAD_RECKONING"))
+            if (isLowConfidence && !prevLowConfidence) {
+                events.add(TripEvent("LOW_CONFIDENCE", "Errors", ts, "WARNING", "Low confidence", mapOf("accuracy" to String.format("%.1fm", hAcc))))
+            }
+            prevLowConfidence = isLowConfidence
 
             if (prevPoint != null) {
                 val dt = max(0L, (ts - prevPoint.timestamp) / 1000)
@@ -125,7 +147,7 @@ object SummaryGenerator {
             prevPoint = p
         }
 
-        events.add(TripEvent("SESSION_ENDED", endTime, "Session Ended"))
+        events.add(TripEvent("SESSION_ENDED", "System", endTime, "INFO", "Session Ended"))
 
         val n = points.size
         

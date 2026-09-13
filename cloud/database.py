@@ -23,4 +23,31 @@ class TelemetryBatch(Base):
     timestamp_received = Column(DateTime, default=datetime.utcnow)
     data = Column(JSON) # Stores list of points to save space/complexity for now
 
+class VehicleProfile(Base):
+    __tablename__ = "vehicle_profiles"
+    id = Column(String, primary_key=True, index=True)
+    device_id = Column(String, index=True)
+    name = Column(String)
+    vehicle_type = Column(String)
+    phone_mounting = Column(String)
+    is_calibrated = Column(Integer, default=0) # SQLite doesn't have native boolean
+    external_imu = Column(Integer, default=0)
+    alignment_params = Column(JSON, nullable=True)
+    calibration_params = Column(JSON, nullable=True)
+    nav_prefs = Column(JSON, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class ExperimentRecord(Base):
+    __tablename__ = "experiments"
+    id = Column(String, primary_key=True, index=True)
+    timestamp = Column(Float)
+    device = Column(String)
+    session_id = Column(String, index=True)
+    model_version = Column(String)
+    map_version = Column(String)
+    configuration = Column(String)
+    outage_scenario = Column(String)
+    results = Column(JSON) # Store metrics (position_error, drift, etc.)
+    
 Base.metadata.create_all(bind=engine)
