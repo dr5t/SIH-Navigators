@@ -119,3 +119,9 @@ dependencies {
   // WorkManager
   implementation("androidx.work:work-runtime-ktx:2.9.0")
 }
+
+  // Mapping
+  implementation("org.osmdroid:osmdroid-android:6.1.18")
+  
+  // Accompanist Permissions
+  implementation("com.google.accompanist:accompanist-permissions:0.34.0")

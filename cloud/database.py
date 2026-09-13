@@ -50,4 +50,18 @@ class ExperimentRecord(Base):
     outage_scenario = Column(String)
     results = Column(JSON) # Store metrics (position_error, drift, etc.)
     
+class FeedbackReport(Base):
+    __tablename__ = "feedback_reports"
+    id = Column(String, primary_key=True, index=True)
+    device_id = Column(String, index=True)
+    category = Column(String)
+    description = Column(String)
+    severity = Column(String)
+    status = Column(String, default="Submitted")
+    session_id = Column(String, nullable=True)
+    technical_context = Column(JSON, nullable=True)
+    rating = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
 Base.metadata.create_all(bind=engine)

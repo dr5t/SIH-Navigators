@@ -14,9 +14,24 @@ import com.example.navigators.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(navController: NavController) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val settingsManager = remember { com.example.navigators.data.SettingsManager(context) }
+    
     Column(Modifier.padding(16.dp).fillMaxSize()) {
-        Text("Dashboard", style = MaterialTheme.typography.titleLarge)
-        Text("Real-time navigation and sensor overview.", color = TextMuted)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Column {
+                Text("Dashboard", style = MaterialTheme.typography.titleLarge)
+                Text("Real-time navigation and sensor overview.", color = TextMuted)
+            }
+            if (settingsManager.isLocalOnlyMode) {
+                Surface(
+                    color = StatusWarning.copy(alpha = 0.2f), 
+                    shape = MaterialTheme.shapes.small
+                ) {
+                    Text("Cloud Sync Disabled", color = StatusWarning, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelSmall)
+                }
+            }
+        }
         
         Spacer(Modifier.height(24.dp))
         
@@ -349,6 +364,89 @@ fun SettingsScreen(navController: NavController) {
         }
         
         Spacer(Modifier.height(16.dp))
+        
+        Text("Data & Privacy Controls", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+        Card(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            colors = CardDefaults.cardColors(containerColor = BgSurfaceElevated)
+        ) {
+            val settingsManager = remember { com.example.navigators.data.SettingsManager(context) }
+            var isLocalOnly by remember { mutableStateOf(settingsManager.isLocalOnlyMode) }
+            var pendingCount by remember { mutableStateOf(0) }
+            var showClearDialog by remember { mutableStateOf(false) }
+            
+            LaunchedEffect(Unit) {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    val db = com.example.navigators.data.TelemetryDatabase.getDatabase(context)
+                    pendingCount = db.telemetryDao().count()
+                }
+            }
+
+            Column(Modifier.padding(16.dp)) {
+                Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Column {
+                        Text("Cloud Sync (Local-Only Mode)", fontWeight = FontWeight.Medium)
+                        Text(if (isLocalOnly) "OFF - Data remains local" else "ON - Data syncs to cloud", color = TextMuted, style = MaterialTheme.typography.bodySmall)
+                    }
+                    Switch(
+                        checked = !isLocalOnly,
+                        onCheckedChange = { 
+                            isLocalOnly = !it
+                            settingsManager.isLocalOnlyMode = isLocalOnly
+                        }
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
+                
+                Text("Pending Uploads: $pendingCount", style = MaterialTheme.typography.bodyMedium)
+                val lastSyncStr = if (settingsManager.lastSuccessfulSync > 0) java.text.SimpleDateFormat("MMM dd, HH:mm", java.util.Locale.getDefault()).format(java.util.Date(settingsManager.lastSuccessfulSync)) else "Never"
+                Text("Last Successful Sync: $lastSyncStr", style = MaterialTheme.typography.bodyMedium)
+                settingsManager.lastSyncError?.let {
+                    Text("Sync Error: $it", color = StatusError, style = MaterialTheme.typography.bodyMedium)
+                }
+                
+                Spacer(Modifier.height(16.dp))
+                Button(
+                    onClick = { showClearDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = StatusError)
+                ) {
+                    Text("Clear Local Data")
+                }
+                
+                if (showClearDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showClearDialog = false },
+                        title = { Text("Delete local data?") },
+                        text = { Text("Clear all pending local telemetry data? This cannot be undone.") },
+                        confirmButton = {
+                            Button(
+                                onClick = { 
+                                    scope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                                        val db = com.example.navigators.data.TelemetryDatabase.getDatabase(context)
+                                        db.telemetryDao().clearAll()
+                                        pendingCount = 0
+                                    }
+                                    showClearDialog = false 
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = StatusError)
+                            ) {
+                                Text("Delete")
+                            }
+                        },
+                        dismissButton = {
+                            Button(onClick = { showClearDialog = false }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
+                }
+            }
+        }
+        
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = { navController.navigate("feedback_center") }, modifier = Modifier.fillMaxWidth()) { Text("Feedback & Support") }
+        Spacer(Modifier.height(8.dp))
         Button(onClick = { navController.navigate("faq") }, modifier = Modifier.fillMaxWidth()) { Text("FAQ") }
         Spacer(Modifier.height(8.dp))
         Button(onClick = { navController.navigate("privacy") }, modifier = Modifier.fillMaxWidth()) { Text("Privacy Policy") }

@@ -14,12 +14,20 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
+import com.example.navigators.data.SettingsManager
+
 class TelemetrySyncWorker(
     private val appContext: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+        val settingsManager = SettingsManager(appContext)
+        if (settingsManager.isLocalOnlyMode) {
+            Log.i("TelemetrySync", "Local-Only mode active. Sync skipped.")
+            return@withContext Result.success()
+        }
+
         val database = TelemetryDatabase.getDatabase(appContext)
         val dao = database.telemetryDao()
 
@@ -34,13 +42,17 @@ class TelemetrySyncWorker(
             if (success) {
                 dao.deleteByIds(records.map { it.id })
                 Log.i("TelemetrySync", "Successfully synced ${records.size} points.")
+                settingsManager.lastSuccessfulSync = System.currentTimeMillis()
+                settingsManager.lastSyncError = null
                 Result.success()
             } else {
                 Log.w("TelemetrySync", "Failed to sync, will retry.")
+                settingsManager.lastSyncError = "Network error or server unavailable"
                 Result.retry()
             }
         } catch (e: Exception) {
             Log.e("TelemetrySync", "Error during sync", e)
+            settingsManager.lastSyncError = e.message ?: "Unknown error"
             Result.retry()
         }
     }

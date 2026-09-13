@@ -119,6 +119,23 @@ export default function SessionReport() {
       </header>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--space-4)' }}>
+        {summary.quality?.analysis_status && (
+          <div className="card" style={{ gridColumn: '1 / -1', borderLeft: `4px solid ${summary.quality.analysis_status === 'NORMAL USE' ? 'var(--status-success)' : summary.quality.analysis_status === 'REVIEW RECOMMENDED' ? 'var(--status-warning)' : 'var(--status-error)'}` }}>
+            <h4 style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px', color: summary.quality.analysis_status === 'NORMAL USE' ? 'var(--status-success)' : summary.quality.analysis_status === 'REVIEW RECOMMENDED' ? 'var(--status-warning)' : 'var(--status-error)' }}>
+              <ShieldAlert size={20} /> Session Quality: {summary.quality.analysis_status}
+            </h4>
+            
+            {summary.quality.analysis_status !== 'NORMAL USE' && summary.quality.analysis_reasons?.length > 0 && (
+              <div style={{ paddingLeft: '28px' }}>
+                <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>Reasons:</div>
+                <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--text-primary)', lineHeight: '1.5' }}>
+                  {summary.quality.analysis_reasons.map((r, i) => <li key={i}>{r}</li>)}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
         {summary.quality?.unavailable ? (
           <div className="card" style={{ gridColumn: '1 / -1' }}>
             <h4 style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>

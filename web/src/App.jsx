@@ -16,6 +16,9 @@ import DeviceCompatibility from './pages/DeviceCompatibility';
 import Profiles from './pages/Profiles';
 import Lab from './pages/Lab';
 
+import Feedback from './pages/Feedback';
+import FeedbackDetail from './pages/FeedbackDetail';
+
 const History = () => <div className="card"><h2>History</h2><p>Diagnostic history.</p></div>;
 const SettingsPage = () => <div className="card"><h2>Settings</h2><p>App configuration.</p></div>;
 const FAQ = () => <div className="card"><h2>FAQ</h2><p>Help and questions.</p></div>;
@@ -67,6 +70,9 @@ const AppShell = ({ children }) => {
           <NavLink to="/sessions" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
             <List size={18} style={{marginRight: '8px'}}/> Sessions
           </NavLink>
+          <NavLink to="/feedback" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
+            <HelpCircle size={18} style={{marginRight: '8px'}}/> Feedback
+          </NavLink>
           <NavLink to="/settings" className={({isActive}) => `btn ${isActive ? 'btn-primary' : 'btn-outline'}`} style={{justifyContent: 'flex-start', border: 'none'}}>
             <Settings size={18} style={{marginRight: '8px'}}/> Settings
           </NavLink>
@@ -104,6 +110,8 @@ export default function App() {
           <Route path="/lab" element={<Lab />} />
           <Route path="/sessions" element={<SessionsList />} />
           <Route path="/sessions/:id" element={<SessionReport />} />
+          <Route path="/feedback" element={<Feedback />} />
+          <Route path="/feedback/:id" element={<FeedbackDetail />} />
           <Route path="/benchmark" element={<Benchmark />} />
           <Route path="/demo" element={<Demo />} />
           <Route path="/history" element={<History />} />

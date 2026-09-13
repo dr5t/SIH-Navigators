@@ -3,8 +3,8 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from typing import List, Dict, Any
 import time
-from database import SessionLocal, SessionRecord, TelemetryBatch, VehicleProfile, ExperimentRecord
-from schemas import VehicleProfileCreate, VehicleProfileUpdate, VehicleProfileResponse, ExperimentRecord as ExperimentRecordSchema
+from database import SessionLocal, SessionRecord, TelemetryBatch, VehicleProfile, ExperimentRecord, FeedbackReport
+from schemas import VehicleProfileCreate, VehicleProfileUpdate, VehicleProfileResponse, ExperimentRecord as ExperimentRecordSchema, FeedbackReportCreate, FeedbackReportResponse, FeedbackStatusUpdate
 from auth import verify_token, create_access_token
 import json
 import math
@@ -199,6 +199,10 @@ def get_session_summary(session_id: str, db: Session = Depends(get_db)):
     end_time = all_points[-1].get("timestamp", 0)
     duration = max(0, (end_time - start_time) / 1000)
     
+    gap_time = 0.0
+    backward_jumps = 0
+    ai_missing_in_dr_time = 0.0
+    
     prev_point = None
     prev_mode = None
     prev_map_matched = False
@@ -262,11 +266,19 @@ def get_session_summary(session_id: str, db: Session = Depends(get_db)):
         prev_low_confidence = is_low_confidence
             
         if prev_point:
-            dt = max(0, (ts - prev_point.get("timestamp", 0)) / 1000)
+            raw_dt = (ts - prev_point.get("timestamp", 0)) / 1000.0
+            if raw_dt < 0:
+                backward_jumps += 1
+            elif raw_dt > 2.0:
+                gap_time += raw_dt
+                
+            dt = max(0, raw_dt)
             if "GNSS" in mode:
                 gnss_time += dt
             else:
                 dr_time += dt
+                if p.get("ai_speed") is None and p.get("aiSpeed") is None:
+                    ai_missing_in_dr_time += dt
                 
             dist = haversine(prev_point.get("lat", 0), prev_point.get("lon", 0), p.get("lat", 0), p.get("lon", 0))
             total_distance += dist
@@ -343,6 +355,28 @@ def get_session_summary(session_id: str, db: Session = Depends(get_db)):
         else:
             score_unavailable = True
 
+    # Quality Analysis
+    quality_status = "NORMAL USE"
+    quality_reasons = []
+    
+    gap_percent = (gap_time / max(1, duration)) * 100
+    
+    if duration < 10 or n < 5 or gap_percent > 50:
+        quality_status = "INSUFFICIENT DATA"
+        quality_reasons.append("Session too short or missing too much data")
+    else:
+        if gap_percent > 10.0:
+            quality_reasons.append(f"{gap_percent:.0f}% sensor data gap")
+        if dr_time > 60.0:
+            quality_reasons.append(f"GNSS unavailable for {dr_time:.0f} s")
+        if backward_jumps > 0:
+            quality_reasons.append(f"{backward_jumps} backward timestamp jumps detected")
+        if ai_missing_in_dr_time > 10.0:
+            quality_reasons.append(f"AI speed unavailable during {ai_missing_in_dr_time:.0f} s")
+            
+        if len(quality_reasons) > 0:
+            quality_status = "REVIEW RECOMMENDED"
+
     quality_data = {
         "unavailable": score_unavailable,
         "overall_score": overall_score,
@@ -350,7 +384,9 @@ def get_session_summary(session_id: str, db: Session = Depends(get_db)):
         "dr_score": round(dr_score),
         "interruptions_score": round(interruptions_score),
         "completeness_score": round(completeness_score),
-        "explanation": explanation
+        "explanation": explanation,
+        "analysis_status": quality_status,
+        "analysis_reasons": quality_reasons
     }
     
     return {
@@ -533,6 +569,93 @@ def delete_profile(profile_id: str, device_id: str = Depends(verify_token), db: 
     db.delete(db_profile)
     db.commit()
     return {"status": "deleted"}
+
+@app.post("/feedback", response_model=FeedbackReportResponse)
+def submit_feedback(report: FeedbackReportCreate, device_id: str = Depends(verify_token), db: Session = Depends(get_db)):
+    import datetime
+    year = datetime.datetime.now().year
+    
+    # Simple ID generation NAV-YYYY-UUID(first 6)
+    short_uuid = str(uuid.uuid4())[:6].upper()
+    report_id = f"NAV-{year}-{short_uuid}"
+    
+    db_report = FeedbackReport(
+        id=report_id,
+        device_id=device_id,
+        category=report.category,
+        description=report.description,
+        severity=report.severity,
+        session_id=report.session_id,
+        technical_context=report.technical_context,
+        rating=report.rating
+    )
+    
+    db.add(db_report)
+    db.commit()
+    db.refresh(db_report)
+    
+    return db_report
+
+@app.get("/feedback", response_model=List[FeedbackReportResponse])
+def get_feedback(
+    status: str = None, 
+    category: str = None,
+    severity: str = None,
+    db: Session = Depends(get_db)
+):
+    # In a real system, require admin token here. For this demo, open endpoint for dashboard.
+    query = db.query(FeedbackReport)
+    
+    if status:
+        query = query.filter(FeedbackReport.status == status)
+    if category:
+        query = query.filter(FeedbackReport.category == category)
+    if severity:
+        query = query.filter(FeedbackReport.severity == severity)
+        
+    return query.order_by(FeedbackReport.created_at.desc()).all()
+
+@app.get("/feedback/analytics")
+def get_feedback_analytics(db: Session = Depends(get_db)):
+    from sqlalchemy import func
+    total = db.query(FeedbackReport).count()
+    open_count = db.query(FeedbackReport).filter(FeedbackReport.status.in_(["Submitted", "Under Review", "Investigating"])).count()
+    resolved = db.query(FeedbackReport).filter(FeedbackReport.status.in_(["Resolved", "Closed"])).count()
+    
+    by_category = db.query(FeedbackReport.category, func.count(FeedbackReport.id)).group_by(FeedbackReport.category).all()
+    by_severity = db.query(FeedbackReport.severity, func.count(FeedbackReport.id)).group_by(FeedbackReport.severity).all()
+    
+    return {
+        "total_reports": total,
+        "open_reports": open_count,
+        "resolved_reports": resolved,
+        "by_category": [{"category": c, "count": cnt} for c, cnt in by_category],
+        "by_severity": [{"severity": s, "count": cnt} for s, cnt in by_severity]
+    }
+
+@app.get("/feedback/{report_id}", response_model=FeedbackReportResponse)
+def get_feedback_detail(report_id: str, db: Session = Depends(get_db)):
+    report = db.query(FeedbackReport).filter(FeedbackReport.id == report_id).first()
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+    return report
+
+@app.put("/feedback/{report_id}/status", response_model=FeedbackReportResponse)
+def update_feedback_status(report_id: str, status_update: FeedbackStatusUpdate, db: Session = Depends(get_db)):
+    report = db.query(FeedbackReport).filter(FeedbackReport.id == report_id).first()
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+        
+    valid_statuses = ["Submitted", "Under Review", "Investigating", "Resolved", "Closed"]
+    if status_update.status not in valid_statuses:
+        raise HTTPException(status_code=400, detail="Invalid status")
+        
+    report.status = status_update.status
+    db.commit()
+    db.refresh(report)
+    
+    return report
+
 
 
 if __name__ == "__main__":

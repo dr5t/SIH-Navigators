@@ -76,3 +76,30 @@ class VehicleProfileResponse(VehicleProfileBase):
 
     class Config:
         from_attributes = True
+
+class FeedbackReportCreate(BaseModel):
+    category: str
+    description: str
+    severity: str
+    session_id: Optional[str] = None
+    technical_context: Optional[dict] = None
+    rating: Optional[str] = None
+
+class FeedbackStatusUpdate(BaseModel):
+    status: str
+
+class FeedbackReportResponse(BaseModel):
+    id: str
+    device_id: str
+    category: str
+    description: str
+    severity: str
+    status: str
+    session_id: Optional[str] = None
+    technical_context: Optional[dict] = None
+    rating: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True

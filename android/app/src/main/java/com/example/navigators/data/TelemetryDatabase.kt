@@ -39,6 +39,9 @@ interface TelemetryDao {
     @Query("DELETE FROM telemetry_queue WHERE id IN (:ids)")
     fun deleteByIds(ids: List<Int>)
     
+    @Query("DELETE FROM telemetry_queue")
+    fun clearAll()
+    
     @Query("SELECT COUNT(*) FROM telemetry_queue")
     fun count(): Int
 }
